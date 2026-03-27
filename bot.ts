@@ -1,11 +1,9 @@
 import TelegramBot from 'node-telegram-bot-api';
 
-// ضع التوكن حقك هنا بين العلامتين
-const token = 'ضع_هنا_التوكن_الذي_نسخته_من_ريبلت'; 
+const token = '8691783072:AAE5cVJOPL6LWqk6Bp_qEDJw1JYLlxTXSGw'; 
 
 const bot = new TelegramBot(token, { polling: true });
 
-// القائمة الرئيسية (نفس تصميمك الفخم)
 const mainMenu = {
     reply_markup: {
         keyboard: [
@@ -42,6 +40,11 @@ bot.on('message', (msg: any) => {
         const prayerTimes = `🕌 أوقات الصلاة — تبوك\n\nالفجر —— 05:08\nالظهر —— 12:39\nالعصر —— 16:08\nالمغرب —— 18:49\nالعشاء —— 20:19\n\n— صدقة جارية لغازي عجاج، اللهم اغفر له`;
         bot.sendMessage(chatId, prayerTimes);
     }
+
+    if (text === "📿 الأذكار اليومية") {
+        const athkar = `📿 أذكار المساء:\n\n1. "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ".\n2. "آية الكرسي".\n3. "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ" (100 مرة).`;
+        bot.sendMessage(chatId, athkar);
+    }
 });
 
-console.log("روبوت الخير بدأ العمل...");
+console.log("روبوت الخير شغال...");
