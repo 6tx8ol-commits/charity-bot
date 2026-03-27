@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 # إعداد Gemini بالمكتبة الجديدة
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
+
 # ذاكرة المحادثات
 chat_sessions = {}
 
