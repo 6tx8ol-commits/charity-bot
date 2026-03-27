@@ -832,6 +832,8 @@ def build_application() -> Application:
 
     logger.info("Application built with all handlers and scheduled jobs.")
     return app
-    if __name__ == "__main__":
-        application = build_application()
-        application.run_polling()
+
+if __name__ == "__main__":
+    application = build_application()
+    print("البوت بدأ العمل... 🚀")
+    application.run_polling(drop_pending_updates=True, close_loop=False)
