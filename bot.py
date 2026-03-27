@@ -22,6 +22,7 @@ from content import (
 )
 from islamic_qa import ask_islamic_question
 
+
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO
