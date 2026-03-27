@@ -1,4 +1,4 @@
-google-generativeai
+google-genai
 python-telegram-bot==21.9
 requests==2.32.3
 yt-dlp>=2024.0.0
