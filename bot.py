@@ -834,5 +834,7 @@ def build_application() -> Application:
     return app
 
 if __name__ == "__main__":
+    import asyncio
     application = build_application()
-    application.run_polling(drop_pending_updates=True)
+    print("البوت بدأ العمل الآن... 🚀")
+    application.run_polling(drop_pending_updates=True, close_loop=False)
