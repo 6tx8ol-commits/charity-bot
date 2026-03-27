@@ -5,15 +5,15 @@ import pytz
 import http.server
 import socketserver
 import threading
+import os
 
-# --- سيرفر وهمي لتشغيل البوت مجاناً على Render ---
 def run_dummy_server():
     handler = http.server.SimpleHTTPRequestHandler
-    with socketserver.TCPServer(("", 8080), handler) as httpd:
+    port = int(os.environ.get('PORT', 8080))
+    with socketserver.TCPServer(("", port), handler) as httpd:
         httpd.serve_forever()
 
-# --- إعدادات البوت ---
-TOKEN = '8691783072:AAE5cVJOPL6LWqk6Bp_qEDJw1JYLlxTXSGw'
+TOKEN = '8691783072:AAHgTtNYMlt2LJPRucHtKzypdDbBzJrM-Lk'
 bot = telebot.TeleBot(TOKEN)
 
 def get_sep():
@@ -30,7 +30,7 @@ def main_menu():
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, "مرحباً بك 🤍\nاختر من القائمة:", reply_markup=main_menu())
+    bot.send_message(message.chat.id, "مرحباً بك في بوت صدقة جارية 🤍\nاختر من القائمة:", reply_markup=main_menu())
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_query(call):
@@ -38,18 +38,21 @@ def handle_query(call):
     
     if call.data == "back_main":
         bot.edit_message_text("القائمة الرئيسية:", cid, mid, reply_markup=main_menu())
+
     elif call.data == "quran":
         markup = types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton("سورة الكهف (رابط خارجي)", url="https://t.me/Quran_pages_bot"),
             types.InlineKeyboardButton("⬅️ رجوع", callback_data="back_main")
         )
         bot.edit_message_text("📖 القرآن الكريم - صفحات مزدوجة:", cid, mid, reply_markup=markup)
+
     elif call.data == "sahaba":
         markup = types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton("عثمان بن عفان رضي الله عنه", callback_data="othman"),
             types.InlineKeyboardButton("⬅️ رجوع", callback_data="back_main")
         )
         bot.edit_message_text("📜 اختر الصحابي:", cid, mid, reply_markup=markup)
+
     elif call.data == "othman":
         markup = types.InlineKeyboardMarkup(row_width=1).add(
             types.InlineKeyboardButton("📖 مسيرته", callback_data="oth_bio"),
@@ -58,12 +61,15 @@ def handle_query(call):
             types.InlineKeyboardButton("⬅️ رجوع", callback_data="sahaba")
         )
         bot.edit_message_text("⭐ عثمان بن عفان رضي الله عنه\nاختر القسم:", cid, mid, reply_markup=markup)
+
     elif call.data == "oth_bio":
-        bot.edit_message_text("عثمان بن عفان: ثالث الخلفاء الراشدين، لُقب بذي النورين وجهز جيش العسرة." + get_sep(), cid, mid, 
+        bot.edit_message_text("عثمان بن عفان: ثالث الخلفاء الراشدين، لُقب بذي النورين وجهز جيش العسرة وجمع القرآن الكريم." + get_sep(), cid, mid, 
                              reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("⬅️ رجوع", callback_data="othman")))
+
     elif call.data == "oth_wives":
-        bot.edit_message_text("زوجاته: رقية بنت رسول الله ﷺ، ثم أم كلثوم، ثم نائلة بنت الفرافصة." + get_sep(), cid, mid, 
+        bot.edit_message_text("زوجاته: رقية بنت رسول الله ﷺ، ثم أم كلثوم، ثم نائلة بنت الفرافصة، وفاطمة بنت غزوان." + get_sep(), cid, mid, 
                              reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("⬅️ رجوع", callback_data="othman")))
+
     elif call.data == "oth_kids":
         bot.edit_message_text("أبناؤه: عبدالله، عمرو، خالد، أبان، عمر، مريم، وأم سعيد رضي الله عنهم." + get_sep(), cid, mid, 
                              reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton("⬅️ رجوع", callback_data="othman")))
