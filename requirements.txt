@@ -2,7 +2,7 @@ openai>=1.10.0
 python-telegram-bot==21.9
 requests==2.32.3
 yt-dlp>=2024.0.0
-hijri-converter>=2.3.0
+hijridate==2.3.0
 pytz
 arabic-reshaper==3.0.0
 python-bidi==0.4.2
