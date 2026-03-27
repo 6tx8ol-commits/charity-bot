@@ -1,0 +1,10 @@
+Python-telegram-bot==21.9
+flask==3.1.0
+APScheduler==3.11.0
+requests==2.32.3
+Pillow>=10.0.0
+arabic-reshaper>=3.0.0
+python-bidi>=0.6.0
+openai>=1.0.0
+yt-dlp>=2024.0.0
+hijri-converter>=2.3.0
