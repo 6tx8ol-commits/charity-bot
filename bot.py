@@ -679,19 +679,22 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text(KHAWATIM_BAQARA)
             await update.message.reply_text(get_separator())
             await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
-            return
+                    return
+       msg = update.message.text
 
     if len(msg) > 3:
-        user_id = update.message.from_user.id if update.message.from_user else None
+        user_id = update.message.from_user.id
         answer = ask_islamic_question(msg, user_id=user_id)
         if answer:
             await update.message.reply_text(answer)
             await update.message.reply_text(get_separator())
-            await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
+            await update.message.reply_text(footer_msg())
         else:
             await update.message.reply_text(
-                "لم اتمكن من الاجابة حاليا — حاول مرة اخرى 🤍",
+                "لم اتمكن من الاجابة حاليا - حاول مرة اخرى 🤍",
                 reply_markup=back_keyboard()
+            )
+
             )
 
 
