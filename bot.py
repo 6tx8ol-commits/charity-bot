@@ -3,7 +3,7 @@ import logging
 import datetime
 import unicodedata
 from zoneinfo import ZoneInfo
-from hijri_converter import Hijri, Gregorian
+from hijridate import Hijri, Gregorian
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ChatMemberHandler, filters, ContextTypes
 from telegram.error import TelegramError
