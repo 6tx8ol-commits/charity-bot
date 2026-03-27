@@ -1,0 +1,12 @@
+{
+  "name": "charity-bot",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx ts-node hello.ts"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
