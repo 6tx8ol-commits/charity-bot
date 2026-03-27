@@ -6,4 +6,4 @@ hijridate
 pytz
 arabic-reshaper
 Pillow
-python-apscheduler
+APScheduler
