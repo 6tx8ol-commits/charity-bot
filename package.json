@@ -2,7 +2,7 @@
   "name": "charity-bot",
   "version": "1.0.0",
   "scripts": {
-    "start": "npx ts-node hello.ts"
+    "start": "npx ts-node bot.ts"
   },
   "dependencies": {
     "node-telegram-bot-api": "^0.66.0",
