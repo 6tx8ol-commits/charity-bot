@@ -678,24 +678,28 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elif verse_type == "KHAWATIM":
                 await update.message.reply_text(KHAWATIM_BAQARA)
             await update.message.reply_text(get_separator())
-            await update.message.reply_text(footer_msg())
+            await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
             return
 
-    msg = update.message.text
-
     if len(msg) > 3:
-        user_id = update.message.from_user.id
+        user_id = update.message.from_user.id if update.message.from_user else None
         answer = ask_islamic_question(msg, user_id=user_id)
         if answer:
             await update.message.reply_text(answer)
             await update.message.reply_text(get_separator())
-            await update.message.reply_text(footer_msg())
+            await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
         else:
             await update.message.reply_text(
-                "لم اتمكن من الاجابة حاليا - حاول مرة اخرى 🤍",
+                "لم اتمكن من الاجابة حاليا — حاول مرة اخرى 🤍",
                 reply_markup=back_keyboard()
             )
 
+
+async def _delete_msgs(context: ContextTypes.DEFAULT_TYPE, chat_id, msg_id1, msg_id2):
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=msg_id1)
+        await context.bot.delete_message(chat_id=chat_id, message_id=msg_id2)
+        logger.info("Deleted welcome messages from channel")
     except TelegramError as e:
         logger.warning(f"Could not delete welcome messages: {e}")
 
@@ -828,8 +832,6 @@ def build_application() -> Application:
 
     logger.info("Application built with all handlers and scheduled jobs.")
     return app
-
-if __name__ == "__main__":
-    application = build_application()
-    print("البوت بدأ العمل... 🚀")
-    application.run_polling(drop_pending_updates=True, close_loop=False)
+    if __name__ == "__main__":
+        application = build_application()
+        application.run_polling()
