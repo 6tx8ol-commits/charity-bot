@@ -351,6 +351,14 @@ def ghazi_surah_keyboard(surah_num):
     return InlineKeyboardMarkup(buttons)
 
 async def show_quran_menu(update, context):
+    site_kb = InlineKeyboardMarkup([[
+        InlineKeyboardButton("🌐 اقرأ القرآن الكريم كاملاً", url="https://helpful-cupcake-2e3954.netlify.app/")
+    ]])
+    await update.effective_message.reply_text(
+        "📖 *القرآن الكريم*\n\nاضغط الزر لفتح الموقع أو اختر سورة من القائمة أدناه:",
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=site_kb,
+    )
     await show_surah_page(update, context, 0)
 
 async def handle_ghazi_quran_callback(update, context):
