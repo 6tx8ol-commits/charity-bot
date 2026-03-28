@@ -136,8 +136,6 @@ surahs.forEach(([name, verses, type], i) => {
   a.className = 'surah-link';
   a.id = `s${num}`;
   a.href = `./surah.html?s=${num}`;
-  a.target = '_blank';
-  a.rel = 'noopener';
   if (num === selected) {
     a.style.background = 'rgba(100,160,220,0.18)';
     a.style.borderColor = 'rgba(100,160,220,0.5)';
