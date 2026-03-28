@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import random
 import threading
@@ -28,6 +29,48 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
+
+ADMIN_ID = 8466914447
+USERS_FILE = "users.json"
+
+def load_users() -> dict:
+    if os.path.exists(USERS_FILE):
+        try:
+            with open(USERS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def save_user(user) -> None:
+    users = load_users()
+    uid = str(user.id)
+    if uid not in users:
+        users[uid] = {
+            "id": user.id,
+            "name": user.full_name,
+            "username": f"@{user.username}" if user.username else "—",
+            "joined": datetime.now(pytz.timezone("Asia/Riyadh")).strftime("%Y-%m-%d %H:%M"),
+        }
+        try:
+            with open(USERS_FILE, "w", encoding="utf-8") as f:
+                json.dump(users, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            pass
+
+async def cmd_users(update, context):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    users = load_users()
+    count = len(users)
+    if count == 0:
+        await update.message.reply_text("لا يوجد مستخدمون بعد.")
+        return
+    lines = [f"👥 المستخدمون في بوت الأذكار: {count}\n"]
+    for u in users.values():
+        lines.append(f"• {u['name']} {u['username']}\n  انضم: {u['joined']}")
+    await update.message.reply_text("\n".join(lines))
+
 logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv("AZKAR_BOT_TOKEN")
@@ -122,6 +165,7 @@ async def show_main(update, context, text=None):
 # ─── START ─────────────────────────────────────────────
 
 async def cmd_start(update, context):
+    save_user(update.effective_user)
     await show_main(update, context)
 
 # ─── MESSAGE ROUTER ─────────────────────────────────────
@@ -1077,6 +1121,7 @@ def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("menu",  cmd_start))
+    app.add_handler(CommandHandler("users", cmd_users))
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_msg
     ))
