@@ -272,6 +272,14 @@ async def route_main(update, context, txt):
 # ═══════════════════════════════════════════════════════
 
 GHAZI_SURAHS_PER_PAGE = 12
+GHAZI_RECITERS = [
+    ("محمد أيوب",          "https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/"),
+    ("سعود الشريم",        "https://server7.mp3quran.net/shur/"),
+    ("عبدالولي الأركاني",  "https://server6.mp3quran.net/arkani/"),
+    ("علي جابر",           "https://server11.mp3quran.net/a_jbr/"),
+    ("عبدالرحمن السديس",   "https://server11.mp3quran.net/sds/"),
+    ("ماهر المعيقلي",      "https://server12.mp3quran.net/maher/"),
+]
 
 def ghazi_quran_keyboard(page=0):
     total_pages = (len(SURAHS) + GHAZI_SURAHS_PER_PAGE - 1) // GHAZI_SURAHS_PER_PAGE
@@ -281,8 +289,10 @@ def ghazi_quran_keyboard(page=0):
     for i in range(start, end, 3):
         row = []
         for s in SURAHS[i:min(i+3, end)]:
-            url = f"https://6tx8ol-commits.github.io/charity-bot/ghazi/surah.html?s={s['number']}"
-            row.append(InlineKeyboardButton(f"{s['number']}. {s['name']}", url=url))
+            row.append(InlineKeyboardButton(
+                f"{s['number']}. {s['name']}",
+                callback_data=f"gsurah_{s['number']}_{page}"
+            ))
         buttons.append(row)
     nav = []
     if page > 0:
@@ -293,23 +303,51 @@ def ghazi_quran_keyboard(page=0):
     buttons.append(nav)
     return InlineKeyboardMarkup(buttons)
 
+def ghazi_surah_keyboard(surah_num, back_page):
+    url_read = f"https://6tx8ol-commits.github.io/charity-bot/ghazi/surah.html?s={surah_num}"
+    buttons = [[InlineKeyboardButton("📖 اقرأ السورة", url=url_read)]]
+    for name, base in GHAZI_RECITERS:
+        audio_url = f"{base}{surah_num:03d}.mp3"
+        buttons.append([InlineKeyboardButton(f"🎧 {name}", url=audio_url)])
+    buttons.append([InlineKeyboardButton("🔙 رجوع للسور", callback_data=f"gquran_p{back_page}")])
+    return InlineKeyboardMarkup(buttons)
+
 async def show_quran_menu(update, context):
     set_state(context, "quran")
     await update.effective_message.reply_text(
         "📖 القرآن الكريم 🤍\n\n"
         "﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾\n\n"
-        "اختر السورة لقراءتها:",
+        "اختر السورة:",
         reply_markup=ghazi_quran_keyboard(0),
     )
 
 async def handle_ghazi_quran_callback(update, context):
     query = update.callback_query
     await query.answer()
-    if query.data == "noop":
+    data = query.data
+    if data == "noop":
         return
-    if query.data.startswith("gquran_p"):
-        page = int(query.data.replace("gquran_p", ""))
+    if data.startswith("gquran_p"):
+        page = int(data.replace("gquran_p", ""))
         await query.message.edit_reply_markup(reply_markup=ghazi_quran_keyboard(page))
+    elif data.startswith("gsurah_"):
+        parts = data.split("_")
+        surah_num  = int(parts[1])
+        back_page  = int(parts[2])
+        surah = next((s for s in SURAHS if s["number"] == surah_num), None)
+        if surah:
+            text = (
+                f"📖 *سورة {surah['name']}*\n"
+                f"🔢 رقمها: *{surah['number']}* | "
+                f"📝 آياتها: *{surah['verses']}* | "
+                f"🕌 *{surah['type']}*\n\n"
+                f"اختر القراءة أو الاستماع:"
+            )
+            await query.message.reply_text(
+                text,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=ghazi_surah_keyboard(surah_num, back_page),
+            )
 
 async def route_quran(update, context, txt):
     if txt == "📚 قائمة السور الـ 114":
@@ -1154,7 +1192,7 @@ def main():
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("menu",  cmd_start))
     app.add_handler(CommandHandler("users", cmd_users))
-    app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(gquran_p\d+|noop)$"))
+    app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(gquran_p\d+|gsurah_\d+_\d+|noop)$"))
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_msg
     ))
