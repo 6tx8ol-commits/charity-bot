@@ -304,7 +304,7 @@ def ghazi_quran_keyboard(page=0):
     return InlineKeyboardMarkup(buttons)
 
 def ghazi_surah_keyboard(surah_num):
-    url_read = f"https://steady-sorbet-b4ed59.netlify.app/surah.html?s={surah_num}"
+    url_read = f"https://helpful-cupcake-2e3954.netlify.app/surah.html?s={surah_num}"
     buttons = [[InlineKeyboardButton("📖 اقرأ السورة", url=url_read)]]
     for name, base in GHAZI_RECITERS:
         audio_url = f"{base}{surah_num:03d}.mp3"
