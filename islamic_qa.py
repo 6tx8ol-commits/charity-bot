@@ -1,32 +1,30 @@
-import os
 import logging
 import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
 
-# حطينا مفتاحك هنا مباشرة عشان نضمن يشتغل فوراً
 GEMINI_KEY = "AIzaSyCKN106cSz4SsFVJZHfLswYJWLKYwFEgbw"
 genai.configure(api_key=GEMINI_KEY)
 
-# أضفنا async هنا عشان يتوافق مع البوت
-async def ask_islamic_question(question, user_id=None):
+async def ask_islamic_question(question):
     try:
+        # تأكدنا من اسم الموديل الصحيح هنا
         model = genai.GenerativeModel('gemini-1.5-flash')
         
-        # ترتيب البرومبت عشان ما يتلخبط الذكاء
         prompt = (
-            "أنت عالم دين إسلامي متخصص ومحاور ودود. "
-            "القواعد: أجب فقط على الأسئلة الدينية. لا تستخدم التشكيل ولا إيموجي ملونة - فقط 🤍. "
-            "اذكر المصادر وباختصار مفيد. إذا لم تكن متأكداً قل: الله أعلم.\n\n"
+            "أنت عالم دين إسلامي متخصص. أجب فقط على الأسئلة الدينية 🤍. "
+            "بدون تشكيل، بدون إيموجي ملون، باختصار مفيد مع ذكر المصادر.\n\n"
             f"السؤال: {question}"
         )
 
-        # نستخدم await هنا
         response = model.generate_content(prompt)
-        return response.text
+        # أضفنا التحقق من وجود نص في الرد
+        if response and response.text:
+            return response.text
+        else:
+            return "الله اعلم، لم أجد إجابة دقيقة حالياً 🤍"
+            
     except Exception as e:
         logger.error(f"Gemini error: {e}")
-        return "الله اعلم، الفكره ستطبق قريبا 🤍"
-
-def clear_history(user_id):
-    pass
+        # غيرنا الرسالة هنا عشان نعرف لو لسه فيه خطأ
+        return f"الله اعلم، (Error: {str(e)[:20]}) 🤍"
