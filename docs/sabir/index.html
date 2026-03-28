@@ -136,7 +136,7 @@ surahs.forEach(([name, verses, type], i) => {
   const a = document.createElement('a');
   a.className = 'surah-link';
   a.id = `s${num}`;
-  a.href = `https://quran.com/ar/${num}`;
+  a.href = `./surah.html?s=${num}`;
   a.target = '_blank';
   a.rel = 'noopener';
   if (num === selected) {

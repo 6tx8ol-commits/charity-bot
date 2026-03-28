@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>القرآن الكريم — صدقة جارية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Tajawal',sans-serif;background:#080c10;color:#e0ddd5;min-height:100vh}
+    .bg{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at top,#0d1b2a 0%,#080c10 70%);z-index:-1}
+    header{text-align:center;padding:30px 20px 20px;border-bottom:1px solid rgba(100,160,220,.12)}
+    .back-btn{display:inline-block;color:#7ab3e0;text-decoration:none;font-size:.9rem;margin-bottom:14px;opacity:.8}
+    .back-btn:hover{opacity:1}
+    h1{font-family:'Amiri',serif;font-size:2rem;color:#7ab3e0;margin-bottom:4px}
+    .meta{font-size:.85rem;color:#4a6070;margin-bottom:6px}
+    .bismillah{font-family:'Amiri',serif;font-size:1.6rem;color:#7ab3e0;text-align:center;padding:28px 20px 10px;opacity:.9}
+    .ayahs{max-width:780px;margin:0 auto;padding:20px 20px 60px}
+    .ayah{font-family:'Amiri',serif;font-size:1.5rem;line-height:2.4;color:#e0ddd5;padding:14px 0;border-bottom:1px solid rgba(100,160,220,.07);position:relative}
+    .ayah-num{display:inline-block;color:#7ab3e0;font-size:.8rem;font-family:'Tajawal',sans-serif;background:rgba(100,160,220,.1);border:1px solid rgba(100,160,220,.25);border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;margin-left:8px;vertical-align:middle}
+    .loading{text-align:center;padding:60px 20px;color:#4a6070;font-size:1rem}
+    .loading-dot{display:inline-block;animation:blink 1.2s infinite}
+    .loading-dot:nth-child(2){animation-delay:.2s}
+    .loading-dot:nth-child(3){animation-delay:.4s}
+    @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+    .error{text-align:center;padding:60px 20px;color:#c0392b}
+    footer{text-align:center;padding:30px;color:#2a3a4a;font-size:.8rem;border-top:1px solid rgba(100,160,220,.08)}
+    .dua{color:#4a6070;font-size:.85rem;padding:20px;text-align:center;line-height:1.8}
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<header>
+  <a class="back-btn" href="./">← العودة لقائمة السور</a>
+  <h1 id="surah-name">...</h1>
+  <div class="meta" id="surah-meta"></div>
+</header>
+<div id="bismillah" class="bismillah" style="display:none">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+<div class="ayahs" id="ayahs">
+  <div class="loading">
+    <span class="loading-dot">●</span>
+    <span class="loading-dot">●</span>
+    <span class="loading-dot">●</span>
+    <br><br>جاري تحميل السورة...
+  </div>
+</div>
+<footer>
+  <div class="dua">اللهم اجعل هذا القرآن صدقة جارية عن روح الأستاذ غازي عجاج رحمه الله<br>واجمعنا به في جنات النعيم 🤍</div>
+</footer>
+<script>
+const params = new URLSearchParams(window.location.search);
+const num = parseInt(params.get('s')) || 1;
+const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+
+document.title = `سورة ${surahNames[num-1]} — القرآن الكريم`;
+document.getElementById('surah-name').textContent = `سورة ${surahNames[num-1]}`;
+
+fetch(`https://api.alquran.cloud/v1/surah/${num}`)
+  .then(r => r.json())
+  .then(data => {
+    const surah = data.data;
+    const verses = surah.numberOfAyahs;
+    const type = surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية';
+    document.getElementById('surah-meta').textContent = `${verses} آية · ${type}`;
+    if (num !== 9) document.getElementById('bismillah').style.display = 'block';
+    const container = document.getElementById('ayahs');
+    container.innerHTML = '';
+    surah.ayahs.forEach(ayah => {
+      const div = document.createElement('div');
+      div.className = 'ayah';
+      const text = num === 1 ? ayah.text : ayah.text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', '');
+      div.innerHTML = `${text} <span class="ayah-num">${ayah.numberInSurah}</span>`;
+      container.appendChild(div);
+    });
+  })
+  .catch(() => {
+    document.getElementById('ayahs').innerHTML = '<div class="error">تعذّر تحميل السورة. تحقق من اتصالك بالإنترنت.</div>';
+  });
+</script>
+</body>
+</html>
