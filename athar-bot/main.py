@@ -702,6 +702,14 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
 
     if msg == "📖 القرآن الكريم":
+        site_kb = InlineKeyboardMarkup([[
+            InlineKeyboardButton("🌐 اقرأ القرآن الكريم كاملاً", url="https://peaceful-gelato-ac3634.netlify.app/")
+        ]])
+        await update.message.reply_text(
+            "📖 *القرآن الكريم*\n\nاضغط الزر لفتح الموقع أو اختر سورة من القائمة أدناه:",
+            parse_mode="Markdown",
+            reply_markup=site_kb,
+        )
         await show_athar_quran_page(update, context, 0)
         return
     if msg == "🌿 الاذكار اليومية":
