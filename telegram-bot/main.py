@@ -343,16 +343,28 @@ def ghazi_quran_keyboard(page=0):
     return InlineKeyboardMarkup(buttons)
 
 def ghazi_surah_keyboard(surah_num):
-    url_read = f"https://helpful-cupcake-2e3954.netlify.app/surah.html?s={surah_num}"
+    n = str(surah_num).zfill(3)
     buttons = [
-        [InlineKeyboardButton("📖 اقرأ السورة", url=url_read)],
+        [InlineKeyboardButton("📖 اقرأ السورة — quran.com", url=f"https://quran.com/ar/{surah_num}")],
+        [
+            InlineKeyboardButton("🎧 محمد أيوب",    url=f"https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/{n}.mp3"),
+            InlineKeyboardButton("🎧 سعود الشريم",  url=f"https://server7.mp3quran.net/shur/{n}.mp3"),
+        ],
+        [
+            InlineKeyboardButton("🎧 الأركاني",     url=f"https://server6.mp3quran.net/arkani/{n}.mp3"),
+            InlineKeyboardButton("🎧 علي جابر",     url=f"https://server11.mp3quran.net/a_jbr/{n}.mp3"),
+        ],
+        [
+            InlineKeyboardButton("🎧 السديس",       url=f"https://server11.mp3quran.net/sds/{n}.mp3"),
+            InlineKeyboardButton("🎧 ماهر المعيقلي", url=f"https://server12.mp3quran.net/maher/{n}.mp3"),
+        ],
         [InlineKeyboardButton("🔙 رجوع للسور", callback_data="ghazi_back_surahs")],
     ]
     return InlineKeyboardMarkup(buttons)
 
 async def show_quran_menu(update, context):
     site_kb = InlineKeyboardMarkup([[
-        InlineKeyboardButton("🌐 اقرأ القرآن الكريم كاملاً", url="https://helpful-cupcake-2e3954.netlify.app/")
+        InlineKeyboardButton("🌐 اقرأ القرآن الكريم كاملاً — quran.com", url="https://quran.com/ar")
     ]])
     await update.effective_message.reply_text(
         "📖 *القرآن الكريم*\n\nاضغط الزر لفتح الموقع أو اختر سورة من القائمة أدناه:",
