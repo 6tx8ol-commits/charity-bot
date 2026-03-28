@@ -681,13 +681,13 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
             return
 
-        if len(msg) > 3:
-        from gemini_ai import ask_gemini
-        answer = await ask_gemini(msg)
+    if len(msg) > 3:
+        user_id = update.message.from_user.id if update.message.from_user else None
+        answer = ask_islamic_question(msg, user_id=user_id)
         if answer:
             await update.message.reply_text(answer)
             await update.message.reply_text(get_separator())
-            await update.message.reply_text(footer_msg())
+            await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
         else:
             await update.message.reply_text(
                 "لم اتمكن من الاجابة حاليا — حاول مرة اخرى 🤍",
@@ -834,6 +834,7 @@ def build_application() -> Application:
     return app
 
 if __name__ == "__main__":
+    import asyncio
     application = build_application()
-    print("البوت بدأ العمل... 🚀")
+    print("البوت بدأ العمل الآن... 🚀")
     application.run_polling(drop_pending_updates=True, close_loop=False)
