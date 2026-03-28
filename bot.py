@@ -20,7 +20,7 @@ from content import (
     WELCOME_TEXT, HELP_TEXT, MORNING_AZKAR_TEXT, EVENING_AZKAR_TEXT, SLEEP_AZKAR_TEXT,
     SALAWAT_TEXT, ISTIJABA_TEXT, SOCIAL_TEXT, KAHF_TEXT, AYAT_KURSI, KHAWATIM_BAQARA, BAQIYAT
 )
-from islamic_qa import ask_islamic_question
+from islamic_qa.py import ask_islamic_question
 
 
 logging.basicConfig(
