@@ -5,7 +5,7 @@ import datetime
 import unicodedata
 from zoneinfo import ZoneInfo
 from hijridate import Hijri, Gregorian
-from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
+from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ChatMemberHandler, filters, ContextTypes
 from telegram.error import TelegramError
 from content import (
@@ -353,6 +353,50 @@ def listen_surah_keyboard(reciter_key, page=0):
     buttons.append([InlineKeyboardButton("رجوع للقائمة", callback_data="menu")])
     return InlineKeyboardMarkup(buttons)
 
+ATHAR_SURAHS_PER_PAGE = 9
+ATHAR_RECITERS = [
+    ("محمد أيوب",         "https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/"),
+    ("سعود الشريم",       "https://server7.mp3quran.net/shur/"),
+    ("عبدالولي الأركاني", "https://server6.mp3quran.net/arkani/"),
+    ("علي جابر",          "https://server11.mp3quran.net/a_jbr/"),
+    ("عبدالرحمن السديس",  "https://server11.mp3quran.net/sds/"),
+    ("ماهر المعيقلي",     "https://server12.mp3quran.net/maher/"),
+]
+
+def athar_surah_page_rows(page):
+    per   = ATHAR_SURAHS_PER_PAGE
+    start = page * per
+    end   = min(start + per, len(QURAN_SURAHS))
+    total = (len(QURAN_SURAHS) - 1) // per + 1
+    rows  = []
+    for i in range(start, end, 3):
+        rows.append([QURAN_SURAHS[j] for j in range(i, min(i + 3, end))])
+    nav = []
+    if page > 0:     nav.append("◀️ السابق")
+    nav.append(f"📄 {page+1}/{total}")
+    if end < len(QURAN_SURAHS): nav.append("▶️ التالي")
+    rows.append(nav)
+    rows.append(["🔙 القائمة الرئيسية"])
+    return rows, page, total
+
+async def show_athar_quran_page(update, context, page):
+    rows, p, total = athar_surah_page_rows(page)
+    context.user_data["athar_quran_page"] = p
+    kb = ReplyKeyboardMarkup(rows, resize_keyboard=True)
+    msg = update.effective_message
+    await msg.reply_text(
+        f"📖 القرآن الكريم 🤍\n\nاختر سورة — الصفحة {p+1}/{total}:",
+        reply_markup=kb,
+    )
+
+def athar_surah_detail_kb(surah_num):
+    url_read = f"https://legendary-yeot-b80ee7.netlify.app/surah.html?s={surah_num}"
+    buttons = [[InlineKeyboardButton("📖 اقرأ السورة", url=url_read)]]
+    for name, base in ATHAR_RECITERS:
+        buttons.append([InlineKeyboardButton(f"🎧 {name}", url=f"{base}{surah_num:03d}.mp3")])
+    buttons.append([InlineKeyboardButton("🔙 رجوع للسور", callback_data="athar_back_surahs")])
+    return InlineKeyboardMarkup(buttons)
+
 SEPARATOR_LINE = "═══ • ═══ ✨ ═══ • ═══"
 
 def get_separator():
@@ -490,10 +534,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text(footer_msg(), reply_markup=azkar_daily_keyboard())
         return
     elif data == "quran_menu":
-        await query.message.reply_text("القرآن الكريم 🤍\n\nاختر السورة لقراءتها:", reply_markup=quran_keyboard(0))
+        await show_athar_quran_page(update, context, 0)
     elif data.startswith("quran_p"):
         page = int(data[7:])
-        await query.message.reply_text("القرآن الكريم 🤍\n\nاختر السورة لقراءتها:", reply_markup=quran_keyboard(page))
+        await show_athar_quran_page(update, context, page)
+    elif data == "athar_back_surahs":
+        page = context.user_data.get("athar_quran_page", 0)
+        await show_athar_quran_page(update, context, page)
     elif data == "listen_menu":
         await query.message.reply_text("🎧 اختر القارئ:", reply_markup=reciter_keyboard())
     elif data.startswith("listen_") and not data.startswith("listen_menu"):
@@ -670,9 +717,34 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
         return
 
-    if msg in ("اثر", "أثر", "القائمة", "المساعدة"):
+    if msg in ("اثر", "أثر", "القائمة", "المساعدة", "🔙 القائمة الرئيسية"):
         await update.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
         return
+
+    if "athar_quran_page" in context.user_data:
+        page = context.user_data["athar_quran_page"]
+        if msg == "▶️ التالي":
+            await show_athar_quran_page(update, context, page + 1)
+            return
+        elif msg == "◀️ السابق":
+            await show_athar_quran_page(update, context, max(0, page - 1))
+            return
+        elif msg.startswith("📄 "):
+            return
+        else:
+            surah_num = next((i + 1 for i, n in enumerate(QURAN_SURAHS) if n == msg), None)
+            if surah_num:
+                text = (
+                    f"📖 *سورة {msg}*\n"
+                    f"🔢 رقمها: *{surah_num}*\n\n"
+                    f"اختر القراءة أو الاستماع:"
+                )
+                await update.message.reply_text(
+                    text,
+                    parse_mode="Markdown",
+                    reply_markup=athar_surah_detail_kb(surah_num),
+                )
+                return
 
     simple_map = {
         ("اذكار", "أذكار", "ذكر"): get_random_azkar,
