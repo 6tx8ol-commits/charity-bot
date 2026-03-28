@@ -336,7 +336,7 @@ async def route_surah_page(update, context, txt, s):
     else:
         surah = next((x for x in SURAHS if f"{x['number']}. {x['name']}" == txt), None)
         if surah:
-            quran_url = f"https://peaceful-gelato-ac3634.netlify.app/surah.html?s={surah['number']}"
+            quran_url = f"https://6tx8ol-commits.github.io/charity-bot/ghazi/surah.html?s={surah['number']}"
             inline_kb = InlineKeyboardMarkup([[
                 InlineKeyboardButton("📖 اقرأ السورة", url=quran_url)
             ]])
