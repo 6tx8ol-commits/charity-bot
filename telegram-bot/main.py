@@ -295,7 +295,7 @@ async def route_quran(update, context, txt):
     elif txt == "🌐 اقرأ القرآن (quran.com)":
         await reply(
             update,
-            "📖 اضغط الرابط لقراءة القرآن الكريم:\n\nhttps://quran.com/ar",
+            "📖 اضغط الرابط لقراءة القرآن الكريم:\n\nhttps://6tx8ol-commits.github.io/charity-bot/ghazi/",
             kb([[BACK_MAIN]]),
             md=False,
         )
@@ -342,7 +342,7 @@ async def route_surah_page(update, context, txt, s):
                 f"🔢 رقمها: *{surah['number']}*\n"
                 f"📝 آياتها: *{surah['verses']}* آية\n"
                 f"🕌 نوعها: *{surah['type']}*\n\n"
-                f"🌐 اقرأها: https://quran.com/ar/{surah['number']}\n"
+                f"🌐 اقرأها: https://6tx8ol-commits.github.io/charity-bot/ghazi/?s={surah['number']}\n"
                 f"🎧 استمع: https://server8.mp3quran.net/afs/{surah['number']:03d}.mp3",
                 kb([[BACK_MAIN]]),
             )
