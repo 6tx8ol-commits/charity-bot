@@ -714,14 +714,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
 
     if msg == "📖 القرآن الكريم":
-        site_kb = InlineKeyboardMarkup([[
-            InlineKeyboardButton("🌐 اقرأ القرآن الكريم كاملاً — quran.com", url="https://quran.com/ar")
-        ]])
-        await update.message.reply_text(
-            "📖 *القرآن الكريم*\n\nاضغط الزر لفتح الموقع أو اختر سورة من القائمة أدناه:",
-            parse_mode="Markdown",
-            reply_markup=site_kb,
-        )
         await show_athar_quran_page(update, context, 0)
         return
     if msg == "🌿 الاذكار اليومية":
@@ -781,6 +773,21 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("🎬 تيك توك:", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("فتح الصفحة", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4")]]))
         return
 
+    # اسم السورة يشتغل دائماً بصرف النظر عن الـ state
+    surah_num_match = next((i + 1 for i, n in enumerate(QURAN_SURAHS) if n == msg), None)
+    if surah_num_match:
+        text = (
+            f"📖 *سورة {msg}*\n"
+            f"🔢 رقمها: *{surah_num_match}*\n\n"
+            f"اختر القراءة أو الاستماع:"
+        )
+        await update.message.reply_text(
+            text,
+            parse_mode="Markdown",
+            reply_markup=athar_surah_detail_kb(surah_num_match),
+        )
+        return
+
     if "athar_quran_page" in context.user_data:
         page = context.user_data["athar_quran_page"]
         if msg == "▶️ التالي":
@@ -791,20 +798,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         elif msg.startswith("📄 "):
             return
-        else:
-            surah_num = next((i + 1 for i, n in enumerate(QURAN_SURAHS) if n == msg), None)
-            if surah_num:
-                text = (
-                    f"📖 *سورة {msg}*\n"
-                    f"🔢 رقمها: *{surah_num}*\n\n"
-                    f"اختر القراءة أو الاستماع:"
-                )
-                await update.message.reply_text(
-                    text,
-                    parse_mode="Markdown",
-                    reply_markup=athar_surah_detail_kb(surah_num),
-                )
-                return
 
     simple_map = {
         ("اذكار", "أذكار", "ذكر"): get_random_azkar,
