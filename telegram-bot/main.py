@@ -324,7 +324,7 @@ def ghazi_quran_keyboard(page=0):
     return InlineKeyboardMarkup(buttons)
 
 def ghazi_surah_keyboard(surah_num):
-    url_read = f"https://helpful-cupcake-2e3954.netlify.app/surah.html?s={surah_num}"
+    url_read = f"https://helpful-cupcake-2e3954.netlify.app/surah?s={surah_num}"
     buttons = [
         [InlineKeyboardButton("📖 اقرأ السورة", url=url_read)],
         [InlineKeyboardButton("🔙 رجوع للسور", callback_data="ghazi_back_surahs")],
