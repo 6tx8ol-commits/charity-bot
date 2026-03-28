@@ -9,7 +9,7 @@ from datetime import datetime
 import pytz
 from hijridate import Gregorian
 
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
     Application, CommandHandler, MessageHandler,
     ContextTypes, filters,
@@ -336,22 +336,29 @@ async def route_surah_page(update, context, txt, s):
     else:
         surah = next((x for x in SURAHS if f"{x['number']}. {x['name']}" == txt), None)
         if surah:
-            await reply(
-                update,
+            quran_url = f"https://6tx8ol-commits.github.io/charity-bot/ghazi/surah.html?s={surah['number']}"
+            inline_kb = InlineKeyboardMarkup([[
+                InlineKeyboardButton("📖 اقرأ السورة", url=quran_url)
+            ]])
+            text = (
                 f"📖 *سورة {surah['name']}*\n\n"
                 f"🔢 رقمها: *{surah['number']}*\n"
                 f"📝 آياتها: *{surah['verses']}* آية\n"
                 f"🕌 نوعها: *{surah['type']}*\n\n"
-                f"🌐 اقرأها: https://peaceful-gelato-ac3634.netlify.app/surah.html?s={surah['number']}\n\n"
                 f"🎧 *الاستماع:*\n"
                 f"• محمد أيوب: https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/{surah['number']:03d}.mp3\n"
                 f"• سعود الشريم: https://server7.mp3quran.net/shur/{surah['number']:03d}.mp3\n"
                 f"• عبدالولي الأركاني: https://server6.mp3quran.net/arkani/{surah['number']:03d}.mp3\n"
                 f"• علي جابر: https://server11.mp3quran.net/a_jbr/{surah['number']:03d}.mp3\n"
                 f"• عبدالرحمن السديس: https://server11.mp3quran.net/sds/{surah['number']:03d}.mp3\n"
-                f"• ماهر المعيقلي: https://server12.mp3quran.net/maher/{surah['number']:03d}.mp3",
-                kb([[BACK_MAIN]]),
+                f"• ماهر المعيقلي: https://server12.mp3quran.net/maher/{surah['number']:03d}.mp3"
             )
+            await update.effective_message.reply_text(
+                text + get_footer(),
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=inline_kb,
+            )
+            await update.effective_message.reply_text(DUA_GHAZI, reply_markup=kb([[BACK_MAIN]]))
         else:
             await show_surah_page(update, context, page)
 
