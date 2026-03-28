@@ -212,6 +212,26 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await route_prayer_region(update, context, txt)
     elif s == "prayer_cities":
         await route_prayer_city(update, context, txt)
+    else:
+        # fallback: إذا كان النص اسم سورة بصرف النظر عن الـ state
+        surah = next((x for x in SURAHS if f"{x['number']}. {x['name']}" == txt), None)
+        if surah:
+            page = context.user_data.get("ghazi_quran_page", 0)
+            context.user_data["ghazi_quran_page"] = page
+            text = (
+                f"📖 *سورة {surah['name']}*\n"
+                f"🔢 رقمها: *{surah['number']}* | "
+                f"📝 آياتها: *{surah['verses']}* آية | "
+                f"🕌 *{surah['type']}*\n\n"
+                f"اختر القراءة أو الاستماع:"
+            )
+            await update.effective_message.reply_text(
+                text,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=ghazi_surah_keyboard(surah['number']),
+            )
+        else:
+            await route_main(update, context, txt)
 
 # ═══════════════════════════════════════════════════════
 #  MAIN ROUTER
