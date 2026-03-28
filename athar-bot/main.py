@@ -4,7 +4,7 @@ import datetime
 import unicodedata
 from zoneinfo import ZoneInfo
 from hijridate import Hijri, Gregorian
-from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ChatMemberHandler, filters, ContextTypes
 from telegram.error import TelegramError
 from content import (
@@ -360,6 +360,7 @@ async def job_daily_quiz(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(".", reply_markup=ReplyKeyboardRemove())
     await update.message.reply_text(WELCOME_TEXT, reply_markup=main_keyboard())
 
 async def cmd_athar(update: Update, context: ContextTypes.DEFAULT_TYPE):
