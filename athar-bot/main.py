@@ -301,6 +301,52 @@ def quran_keyboard(page=0):
     if page < total_pages - 1:
         nav.append(InlineKeyboardButton("التالي ←", callback_data=f"quran_p{page+1}"))
     buttons.append(nav)
+    buttons.append([InlineKeyboardButton("🎧 استمع لسورة", callback_data="listen_menu")])
+    buttons.append([InlineKeyboardButton("رجوع للقائمة", callback_data="menu")])
+    return InlineKeyboardMarkup(buttons)
+
+RECITERS = {
+    "ayoub":  ("محمد أيوب",          "https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/"),
+    "shur":   ("سعود الشريم",        "https://server7.mp3quran.net/shur/"),
+    "arkani": ("عبدالولي الأركاني",  "https://server6.mp3quran.net/arkani/"),
+    "a_jbr":  ("علي جابر",           "https://server11.mp3quran.net/a_jbr/"),
+    "sds":    ("عبدالرحمن السديس",   "https://server11.mp3quran.net/sds/"),
+    "maher":  ("ماهر المعيقلي",      "https://server12.mp3quran.net/maher/"),
+}
+
+def reciter_keyboard():
+    rows = []
+    keys = list(RECITERS.keys())
+    for i in range(0, len(keys), 2):
+        row = []
+        for key in keys[i:i+2]:
+            name, _ = RECITERS[key]
+            row.append(InlineKeyboardButton(f"🎤 {name}", callback_data=f"listen_{key}"))
+        rows.append(row)
+    rows.append([InlineKeyboardButton("رجوع للقائمة", callback_data="menu")])
+    return InlineKeyboardMarkup(rows)
+
+def listen_surah_keyboard(reciter_key, page=0):
+    per_page = 18
+    total_pages = (len(QURAN_SURAHS) + per_page - 1) // per_page
+    start = page * per_page
+    end = min(start + per_page, len(QURAN_SURAHS))
+    buttons = []
+    for i in range(start, end, 3):
+        row = []
+        for j in range(i, min(i + 3, end)):
+            num = j + 1
+            name = QURAN_SURAHS[j]
+            row.append(InlineKeyboardButton(f"{num}. {name}", callback_data=f"laudio_{reciter_key}_{num}"))
+        buttons.append(row)
+    nav = []
+    if page > 0:
+        nav.append(InlineKeyboardButton("→ السابق", callback_data=f"lp_{reciter_key}_{page-1}"))
+    nav.append(InlineKeyboardButton(f"{page+1}/{total_pages}", callback_data="noop"))
+    if page < total_pages - 1:
+        nav.append(InlineKeyboardButton("التالي ←", callback_data=f"lp_{reciter_key}_{page+1}"))
+    buttons.append(nav)
+    buttons.append([InlineKeyboardButton("← القرّاء", callback_data="listen_menu")])
     buttons.append([InlineKeyboardButton("رجوع للقائمة", callback_data="menu")])
     return InlineKeyboardMarkup(buttons)
 
@@ -445,6 +491,32 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data.startswith("quran_p"):
         page = int(data[7:])
         await query.message.reply_text("القرآن الكريم 🤍\n\nاختر السورة لقراءتها:", reply_markup=quran_keyboard(page))
+    elif data == "listen_menu":
+        await query.message.reply_text("🎧 اختر القارئ:", reply_markup=reciter_keyboard())
+    elif data.startswith("listen_") and not data.startswith("listen_menu"):
+        key = data[7:]
+        if key in RECITERS:
+            name, _ = RECITERS[key]
+            await query.message.reply_text(f"🎤 {name}\n\nاختر السورة:", reply_markup=listen_surah_keyboard(key, 0))
+    elif data.startswith("lp_"):
+        parts = data[3:].rsplit("_", 1)
+        if len(parts) == 2:
+            key, page = parts[0], int(parts[1])
+            if key in RECITERS:
+                name, _ = RECITERS[key]
+                await query.message.reply_text(f"🎤 {name}\n\nاختر السورة:", reply_markup=listen_surah_keyboard(key, page))
+    elif data.startswith("laudio_"):
+        parts = data[7:].rsplit("_", 1)
+        if len(parts) == 2:
+            key, num = parts[0], int(parts[1])
+            if key in RECITERS and 1 <= num <= 114:
+                r_name, base_url = RECITERS[key]
+                s_name = QURAN_SURAHS[num - 1]
+                url = f"{base_url}{num:03d}.mp3"
+                await query.message.reply_text(
+                    f"🎧 سورة {s_name} — {r_name}\n\n{url}",
+                    disable_web_page_preview=True
+                )
     elif data == "asma":
         await query.message.reply_text("اسماء الله الحسنى 🤍\n\nاختر اسما لمعرفة معناه:", reply_markup=asma_keyboard(0))
     elif data.startswith("asma_p"):

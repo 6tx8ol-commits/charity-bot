@@ -342,8 +342,14 @@ async def route_surah_page(update, context, txt, s):
                 f"🔢 رقمها: *{surah['number']}*\n"
                 f"📝 آياتها: *{surah['verses']}* آية\n"
                 f"🕌 نوعها: *{surah['type']}*\n\n"
-                f"🌐 اقرأها: https://6tx8ol-commits.github.io/charity-bot/ghazi/?s={surah['number']}\n"
-                f"🎧 استمع: https://server8.mp3quran.net/afs/{surah['number']:03d}.mp3",
+                f"🌐 اقرأها: https://6tx8ol-commits.github.io/charity-bot/ghazi/?s={surah['number']}\n\n"
+                f"🎧 *الاستماع:*\n"
+                f"• محمد أيوب: https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/{surah['number']:03d}.mp3\n"
+                f"• سعود الشريم: https://server7.mp3quran.net/shur/{surah['number']:03d}.mp3\n"
+                f"• عبدالولي الأركاني: https://server6.mp3quran.net/arkani/{surah['number']:03d}.mp3\n"
+                f"• علي جابر: https://server11.mp3quran.net/a_jbr/{surah['number']:03d}.mp3\n"
+                f"• عبدالرحمن السديس: https://server11.mp3quran.net/sds/{surah['number']:03d}.mp3\n"
+                f"• ماهر المعيقلي: https://server12.mp3quran.net/maher/{surah['number']:03d}.mp3",
                 kb([[BACK_MAIN]]),
             )
         else:
