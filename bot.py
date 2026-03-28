@@ -1,3 +1,4 @@
+import requests
 import os
 import logging
 import datetime
@@ -43,104 +44,104 @@ IMAGES_DIR = os.path.join(os.path.dirname(__file__), "images")
 TIMEZONE = ZoneInfo("Asia/Riyadh")
 
 HIJRI_MONTHS = {
-    1: "محرم", 2: "صفر", 3: "ربيع الاول", 4: "ربيع الثاني",
-    5: "جمادى الاولى", 6: "جمادى الثانية", 7: "رجب", 8: "شعبان",
-    9: "رمضان", 10: "شوال", 11: "ذو القعدة", 12: "ذو الحجة"
+    1: "ÙØ­Ø±Ù", 2: "ØµÙØ±", 3: "Ø±Ø¨ÙØ¹ Ø§ÙØ§ÙÙ", 4: "Ø±Ø¨ÙØ¹ Ø§ÙØ«Ø§ÙÙ",
+    5: "Ø¬ÙØ§Ø¯Ù Ø§ÙØ§ÙÙÙ", 6: "Ø¬ÙØ§Ø¯Ù Ø§ÙØ«Ø§ÙÙØ©", 7: "Ø±Ø¬Ø¨", 8: "Ø´Ø¹Ø¨Ø§Ù",
+    9: "Ø±ÙØ¶Ø§Ù", 10: "Ø´ÙØ§Ù", 11: "Ø°Ù Ø§ÙÙØ¹Ø¯Ø©", 12: "Ø°Ù Ø§ÙØ­Ø¬Ø©"
 }
 
 GREGORIAN_MONTHS = {
-    1: "يناير", 2: "فبراير", 3: "مارس", 4: "ابريل",
-    5: "مايو", 6: "يونيو", 7: "يوليو", 8: "اغسطس",
-    9: "سبتمبر", 10: "اكتوبر", 11: "نوفمبر", 12: "ديسمبر"
+    1: "ÙÙØ§ÙØ±", 2: "ÙØ¨Ø±Ø§ÙØ±", 3: "ÙØ§Ø±Ø³", 4: "Ø§Ø¨Ø±ÙÙ",
+    5: "ÙØ§ÙÙ", 6: "ÙÙÙÙÙ", 7: "ÙÙÙÙÙ", 8: "Ø§ØºØ³Ø·Ø³",
+    9: "Ø³Ø¨ØªÙØ¨Ø±", 10: "Ø§ÙØªÙØ¨Ø±", 11: "ÙÙÙÙØ¨Ø±", 12: "Ø¯ÙØ³ÙØ¨Ø±"
 }
 
 DAYS_AR = {
-    0: "الاثنين", 1: "الثلاثاء", 2: "الاربعاء", 3: "الخميس",
-    4: "الجمعة", 5: "السبت", 6: "الاحد"
+    0: "Ø§ÙØ§Ø«ÙÙÙ", 1: "Ø§ÙØ«ÙØ§Ø«Ø§Ø¡", 2: "Ø§ÙØ§Ø±Ø¨Ø¹Ø§Ø¡", 3: "Ø§ÙØ®ÙÙØ³",
+    4: "Ø§ÙØ¬ÙØ¹Ø©", 5: "Ø§ÙØ³Ø¨Øª", 6: "Ø§ÙØ§Ø­Ø¯"
 }
 
 def get_date_line():
     now = datetime.datetime.now(TIMEZONE)
     hijri = Gregorian(now.year, now.month, now.day).to_hijri()
     day_name = DAYS_AR.get(now.weekday(), "")
-    h_text = f"{hijri.day} {HIJRI_MONTHS[hijri.month]} {hijri.year} هـ"
-    g_text = f"{now.day} {GREGORIAN_MONTHS[now.month]} {now.year} م"
-    time_text = now.strftime("%I:%M %p").replace("AM", "ص").replace("PM", "م")
-    line1 = f"• {day_name} — {time_text} •"
-    line2 = f"• {h_text} — {g_text} •"
+    h_text = f"{hijri.day} {HIJRI_MONTHS[hijri.month]} {hijri.year} ÙÙ"
+    g_text = f"{now.day} {GREGORIAN_MONTHS[now.month]} {now.year} Ù"
+    time_text = now.strftime("%I:%M %p").replace("AM", "Øµ").replace("PM", "Ù")
+    line1 = f"â¢ {day_name} â {time_text} â¢"
+    line2 = f"â¢ {h_text} â {g_text} â¢"
     return f"                    {line1}\n        {line2}"
 
 
 def main_keyboard():
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("القرآن الكريم", callback_data="quran_menu"),
+            InlineKeyboardButton("Ø§ÙÙØ±Ø¢Ù Ø§ÙÙØ±ÙÙ", callback_data="quran_menu"),
         ],
         [
-            InlineKeyboardButton("الاذكار اليومية", callback_data="azkar_daily"),
-            InlineKeyboardButton("دعاء", callback_data="dua"),
+            InlineKeyboardButton("Ø§ÙØ§Ø°ÙØ§Ø± Ø§ÙÙÙÙÙØ©", callback_data="azkar_daily"),
+            InlineKeyboardButton("Ø¯Ø¹Ø§Ø¡", callback_data="dua"),
         ],
         [
-            InlineKeyboardButton("ادعية الانبياء", callback_data="dua_nabi"),
-            InlineKeyboardButton("آية قرآنية", callback_data="ayah"),
+            InlineKeyboardButton("Ø§Ø¯Ø¹ÙØ© Ø§ÙØ§ÙØ¨ÙØ§Ø¡", callback_data="dua_nabi"),
+            InlineKeyboardButton("Ø¢ÙØ© ÙØ±Ø¢ÙÙØ©", callback_data="ayah"),
         ],
         [
-            InlineKeyboardButton("السيرة النبوية", callback_data="prophets_menu"),
-            InlineKeyboardButton("قصة صحابي", callback_data="sahabi"),
+            InlineKeyboardButton("Ø§ÙØ³ÙØ±Ø© Ø§ÙÙØ¨ÙÙØ©", callback_data="prophets_menu"),
+            InlineKeyboardButton("ÙØµØ© ØµØ­Ø§Ø¨Ù", callback_data="sahabi"),
         ],
         [
-            InlineKeyboardButton("قصة قرآنية", callback_data="quran_story"),
-            InlineKeyboardButton("الباقيات الصالحات", callback_data="baqiyat"),
+            InlineKeyboardButton("ÙØµØ© ÙØ±Ø¢ÙÙØ©", callback_data="quran_story"),
+            InlineKeyboardButton("Ø§ÙØ¨Ø§ÙÙØ§Øª Ø§ÙØµØ§ÙØ­Ø§Øª", callback_data="baqiyat"),
         ],
         [
-            InlineKeyboardButton("تحصين النفس", callback_data="tahseen"),
-            InlineKeyboardButton("آية الكرسي", callback_data="kursi"),
+            InlineKeyboardButton("ØªØ­ØµÙÙ Ø§ÙÙÙØ³", callback_data="tahseen"),
+            InlineKeyboardButton("Ø¢ÙØ© Ø§ÙÙØ±Ø³Ù", callback_data="kursi"),
         ],
         [
-            InlineKeyboardButton("حديث نبوي", callback_data="hadith"),
-            InlineKeyboardButton("اسماء الله الحسنى", callback_data="asma"),
+            InlineKeyboardButton("Ø­Ø¯ÙØ« ÙØ¨ÙÙ", callback_data="hadith"),
+            InlineKeyboardButton("Ø§Ø³ÙØ§Ø¡ Ø§ÙÙÙ Ø§ÙØ­Ø³ÙÙ", callback_data="asma"),
         ],
         [
-            InlineKeyboardButton("فضائل الاعمال", callback_data="fadail"),
-            InlineKeyboardButton("اذكار بعد الصلاة", callback_data="azkar_salah"),
+            InlineKeyboardButton("ÙØ¶Ø§Ø¦Ù Ø§ÙØ§Ø¹ÙØ§Ù", callback_data="fadail"),
+            InlineKeyboardButton("Ø§Ø°ÙØ§Ø± Ø¨Ø¹Ø¯ Ø§ÙØµÙØ§Ø©", callback_data="azkar_salah"),
         ],
         [
-            InlineKeyboardButton("الاستغفار", callback_data="istighfar"),
-            InlineKeyboardButton("آداب اسلامية", callback_data="adab"),
+            InlineKeyboardButton("Ø§ÙØ§Ø³ØªØºÙØ§Ø±", callback_data="istighfar"),
+            InlineKeyboardButton("Ø¢Ø¯Ø§Ø¨ Ø§Ø³ÙØ§ÙÙØ©", callback_data="adab"),
         ],
         [
-            InlineKeyboardButton("اوقات الصلاة", callback_data="prayer_times"),
+            InlineKeyboardButton("Ø§ÙÙØ§Øª Ø§ÙØµÙØ§Ø©", callback_data="prayer_times"),
         ],
         [
-            InlineKeyboardButton("قناة اثر", url="https://t.me/Athar_Atkar"),
+            InlineKeyboardButton("ÙÙØ§Ø© Ø§Ø«Ø±", url="https://t.me/Athar_Atkar"),
         ],
         [
-            InlineKeyboardButton("انستقرام", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
-            InlineKeyboardButton("تيك توك", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4"),
+            InlineKeyboardButton("Ø§ÙØ³ØªÙØ±Ø§Ù", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
+            InlineKeyboardButton("ØªÙÙ ØªÙÙ", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4"),
         ],
     ])
 
 
 def back_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")]
+        [InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu")]
     ])
 
 def azkar_daily_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("اذكار الصباح", callback_data="sabah")],
-        [InlineKeyboardButton("اذكار المساء", callback_data="masa")],
-        [InlineKeyboardButton("اذكار النوم", callback_data="nawm")],
-        [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")],
+        [InlineKeyboardButton("Ø§Ø°ÙØ§Ø± Ø§ÙØµØ¨Ø§Ø­", callback_data="sabah")],
+        [InlineKeyboardButton("Ø§Ø°ÙØ§Ø± Ø§ÙÙØ³Ø§Ø¡", callback_data="masa")],
+        [InlineKeyboardButton("Ø§Ø°ÙØ§Ø± Ø§ÙÙÙÙ", callback_data="nawm")],
+        [InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu")],
     ])
 
 def prayer_times_keyboard():
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("المناطق", callback_data="pt_regions"),
-            InlineKeyboardButton("المدن", callback_data="pt_cities"),
+            InlineKeyboardButton("Ø§ÙÙÙØ§Ø·Ù", callback_data="pt_regions"),
+            InlineKeyboardButton("Ø§ÙÙØ¯Ù", callback_data="pt_cities"),
         ],
-        [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")],
+        [InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu")],
     ])
 
 def regions_keyboard():
@@ -151,7 +152,7 @@ def regions_keyboard():
         if i + 1 < len(keys):
             row.append(InlineKeyboardButton(SAUDI_REGIONS[keys[i+1]]["name"], callback_data=f"pt_{keys[i+1]}"))
         buttons.append(row)
-    buttons.append([InlineKeyboardButton("رجوع", callback_data="prayer_times")])
+    buttons.append([InlineKeyboardButton("Ø±Ø¬ÙØ¹", callback_data="prayer_times")])
     return InlineKeyboardMarkup(buttons)
 
 def cities_keyboard():
@@ -162,62 +163,62 @@ def cities_keyboard():
         if i + 1 < len(keys):
             row.append(InlineKeyboardButton(SAUDI_CITIES[keys[i+1]]["name"], callback_data=f"pt_{keys[i+1]}"))
         buttons.append(row)
-    buttons.append([InlineKeyboardButton("رجوع", callback_data="prayer_times")])
+    buttons.append([InlineKeyboardButton("Ø±Ø¬ÙØ¹", callback_data="prayer_times")])
     return InlineKeyboardMarkup(buttons)
 
 def prophets_keyboard_page1():
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("آدم", callback_data="prophet_adam"),
-            InlineKeyboardButton("ادريس", callback_data="prophet_idris"),
-            InlineKeyboardButton("نوح", callback_data="prophet_nuh"),
+            InlineKeyboardButton("Ø¢Ø¯Ù", callback_data="prophet_adam"),
+            InlineKeyboardButton("Ø§Ø¯Ø±ÙØ³", callback_data="prophet_idris"),
+            InlineKeyboardButton("ÙÙØ­", callback_data="prophet_nuh"),
         ],
         [
-            InlineKeyboardButton("هود", callback_data="prophet_hud"),
-            InlineKeyboardButton("صالح", callback_data="prophet_salih"),
-            InlineKeyboardButton("ابراهيم", callback_data="prophet_ibrahim"),
+            InlineKeyboardButton("ÙÙØ¯", callback_data="prophet_hud"),
+            InlineKeyboardButton("ØµØ§ÙØ­", callback_data="prophet_salih"),
+            InlineKeyboardButton("Ø§Ø¨Ø±Ø§ÙÙÙ", callback_data="prophet_ibrahim"),
         ],
         [
-            InlineKeyboardButton("لوط", callback_data="prophet_lut"),
-            InlineKeyboardButton("اسماعيل", callback_data="prophet_ismail"),
-            InlineKeyboardButton("اسحاق", callback_data="prophet_ishaq"),
+            InlineKeyboardButton("ÙÙØ·", callback_data="prophet_lut"),
+            InlineKeyboardButton("Ø§Ø³ÙØ§Ø¹ÙÙ", callback_data="prophet_ismail"),
+            InlineKeyboardButton("Ø§Ø³Ø­Ø§Ù", callback_data="prophet_ishaq"),
         ],
         [
-            InlineKeyboardButton("يعقوب", callback_data="prophet_yaqub"),
-            InlineKeyboardButton("يوسف", callback_data="prophet_yusuf"),
-            InlineKeyboardButton("شعيب", callback_data="prophet_shuaib"),
+            InlineKeyboardButton("ÙØ¹ÙÙØ¨", callback_data="prophet_yaqub"),
+            InlineKeyboardButton("ÙÙØ³Ù", callback_data="prophet_yusuf"),
+            InlineKeyboardButton("Ø´Ø¹ÙØ¨", callback_data="prophet_shuaib"),
         ],
         [
-            InlineKeyboardButton("التالي ←", callback_data="prophets_page2"),
-            InlineKeyboardButton("رجوع للقائمة", callback_data="menu"),
+            InlineKeyboardButton("Ø§ÙØªØ§ÙÙ â", callback_data="prophets_page2"),
+            InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu"),
         ],
     ])
 
 def prophets_keyboard_page2():
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("موسى", callback_data="prophet_musa"),
-            InlineKeyboardButton("هارون", callback_data="prophet_harun"),
-            InlineKeyboardButton("داود", callback_data="prophet_dawud"),
+            InlineKeyboardButton("ÙÙØ³Ù", callback_data="prophet_musa"),
+            InlineKeyboardButton("ÙØ§Ø±ÙÙ", callback_data="prophet_harun"),
+            InlineKeyboardButton("Ø¯Ø§ÙØ¯", callback_data="prophet_dawud"),
         ],
         [
-            InlineKeyboardButton("سليمان", callback_data="prophet_sulaiman"),
-            InlineKeyboardButton("الياس", callback_data="prophet_ilyas"),
-            InlineKeyboardButton("اليسع", callback_data="prophet_alyasa"),
+            InlineKeyboardButton("Ø³ÙÙÙØ§Ù", callback_data="prophet_sulaiman"),
+            InlineKeyboardButton("Ø§ÙÙØ§Ø³", callback_data="prophet_ilyas"),
+            InlineKeyboardButton("Ø§ÙÙØ³Ø¹", callback_data="prophet_alyasa"),
         ],
         [
-            InlineKeyboardButton("ذو الكفل", callback_data="prophet_dhulkifl"),
-            InlineKeyboardButton("يونس", callback_data="prophet_yunus"),
-            InlineKeyboardButton("زكريا", callback_data="prophet_zakariya"),
+            InlineKeyboardButton("Ø°Ù Ø§ÙÙÙÙ", callback_data="prophet_dhulkifl"),
+            InlineKeyboardButton("ÙÙÙØ³", callback_data="prophet_yunus"),
+            InlineKeyboardButton("Ø²ÙØ±ÙØ§", callback_data="prophet_zakariya"),
         ],
         [
-            InlineKeyboardButton("يحيى", callback_data="prophet_yahya"),
-            InlineKeyboardButton("عيسى", callback_data="prophet_isa"),
-            InlineKeyboardButton("محمد ﷺ", callback_data="prophet_muhammad"),
+            InlineKeyboardButton("ÙØ­ÙÙ", callback_data="prophet_yahya"),
+            InlineKeyboardButton("Ø¹ÙØ³Ù", callback_data="prophet_isa"),
+            InlineKeyboardButton("ÙØ­ÙØ¯ ï·º", callback_data="prophet_muhammad"),
         ],
         [
-            InlineKeyboardButton("→ السابق", callback_data="prophets_page1"),
-            InlineKeyboardButton("رجوع للقائمة", callback_data="menu"),
+            InlineKeyboardButton("â Ø§ÙØ³Ø§Ø¨Ù", callback_data="prophets_page1"),
+            InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu"),
         ],
     ])
 
@@ -236,12 +237,12 @@ def asma_keyboard(page=0):
         buttons.append(row)
     nav = []
     if page > 0:
-        nav.append(InlineKeyboardButton("→ السابق", callback_data=f"asma_p{page-1}"))
+        nav.append(InlineKeyboardButton("â Ø§ÙØ³Ø§Ø¨Ù", callback_data=f"asma_p{page-1}"))
     nav.append(InlineKeyboardButton(f"{page+1}/{total_pages}", callback_data="noop"))
     if page < total_pages - 1:
-        nav.append(InlineKeyboardButton("التالي ←", callback_data=f"asma_p{page+1}"))
+        nav.append(InlineKeyboardButton("Ø§ÙØªØ§ÙÙ â", callback_data=f"asma_p{page+1}"))
     buttons.append(nav)
-    buttons.append([InlineKeyboardButton("رجوع للقائمة", callback_data="menu")])
+    buttons.append([InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu")])
     return InlineKeyboardMarkup(buttons)
 
 SURAHS_PER_PAGE = 12
@@ -261,27 +262,27 @@ def quran_keyboard(page=0):
         buttons.append(row)
     nav = []
     if page > 0:
-        nav.append(InlineKeyboardButton("→ السابق", callback_data=f"quran_p{page-1}"))
+        nav.append(InlineKeyboardButton("â Ø§ÙØ³Ø§Ø¨Ù", callback_data=f"quran_p{page-1}"))
     nav.append(InlineKeyboardButton(f"{page+1}/{total_pages}", callback_data="noop"))
     if page < total_pages - 1:
-        nav.append(InlineKeyboardButton("التالي ←", callback_data=f"quran_p{page+1}"))
+        nav.append(InlineKeyboardButton("Ø§ÙØªØ§ÙÙ â", callback_data=f"quran_p{page+1}"))
     buttons.append(nav)
-    buttons.append([InlineKeyboardButton("رجوع للقائمة", callback_data="menu")])
+    buttons.append([InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu")])
     return InlineKeyboardMarkup(buttons)
 
-SEPARATOR_LINE = "═══ • ═══ ✨ ═══ • ═══"
+SEPARATOR_LINE = "âââ â¢ âââ â¨ âââ â¢ âââ"
 
 def get_separator():
     now = datetime.datetime.now(TIMEZONE)
     hijri = Gregorian(now.year, now.month, now.day).to_hijri()
-    h_text = f"{hijri.day} {HIJRI_MONTHS[hijri.month]} {hijri.year} هـ"
-    g_text = f"{now.day} {GREGORIAN_MONTHS[now.month]} {now.year} م"
+    h_text = f"{hijri.day} {HIJRI_MONTHS[hijri.month]} {hijri.year} ÙÙ"
+    g_text = f"{now.day} {GREGORIAN_MONTHS[now.month]} {now.year} Ù"
     day_name = DAYS_AR.get(now.weekday(), "")
-    time_text = now.strftime("%I:%M %p").replace("AM", "ص").replace("PM", "م")
-    return f"{h_text} — {day_name}\n{SEPARATOR_LINE}\n{g_text} — {time_text}"
+    time_text = now.strftime("%I:%M %p").replace("AM", "Øµ").replace("PM", "Ù")
+    return f"{h_text} â {day_name}\n{SEPARATOR_LINE}\n{g_text} â {time_text}"
 
 def footer_msg():
-    return f"""لا تنسون تدعون لـ جدي وجدتي ولجميع اموات المسلمين بالرحمة والمغفرة.. اللهم اجعل نورهما لا ينطفئ واجمعنا بهم في جنات النعيم 🤍
+    return f"""ÙØ§ ØªÙØ³ÙÙ ØªØ¯Ø¹ÙÙ ÙÙ Ø¬Ø¯Ù ÙØ¬Ø¯ØªÙ ÙÙØ¬ÙÙØ¹ Ø§ÙÙØ§Øª Ø§ÙÙØ³ÙÙÙÙ Ø¨Ø§ÙØ±Ø­ÙØ© ÙØ§ÙÙØºÙØ±Ø©.. Ø§ÙÙÙÙ Ø§Ø¬Ø¹Ù ÙÙØ±ÙÙØ§ ÙØ§ ÙÙØ·ÙØ¦ ÙØ§Ø¬ÙØ¹ÙØ§ Ø¨ÙÙ ÙÙ Ø¬ÙØ§Øª Ø§ÙÙØ¹ÙÙ ð¤
 
 {get_date_line()}"""
 
@@ -368,7 +369,7 @@ async def job_schedule_prayer_alerts(context: ContextTypes.DEFAULT_TYPE):
             )
             logger.info(f"Scheduled {prayer_key} alert at {time_str}")
         else:
-            logger.info(f"Skipped {prayer_key} — already passed ({time_str})")
+            logger.info(f"Skipped {prayer_key} â already passed ({time_str})")
 
 async def job_daily_story(context: ContextTypes.DEFAULT_TYPE):
     import random
@@ -382,7 +383,7 @@ async def job_daily_quiz(context: ContextTypes.DEFAULT_TYPE):
     quiz = get_random_quiz()
     logger.info("Sending daily quiz...")
     try:
-        question_text = f"سؤال اليوم 🤍\n\n{quiz['q']}"
+        question_text = f"Ø³Ø¤Ø§Ù Ø§ÙÙÙÙ ð¤\n\n{quiz['q']}"
         await context.bot.send_poll(
             chat_id=CHANNEL_ID,
             question=question_text,
@@ -434,7 +435,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "menu":
         await query.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
     elif data == "azkar_daily":
-        await query.message.reply_text("الاذكار اليومية 🤍\n\nاختر:", reply_markup=azkar_daily_keyboard())
+        await query.message.reply_text("Ø§ÙØ§Ø°ÙØ§Ø± Ø§ÙÙÙÙÙØ© ð¤\n\nØ§Ø®ØªØ±:", reply_markup=azkar_daily_keyboard())
     elif data in ("sabah", "masa", "nawm"):
         funcs = {"sabah": get_random_azkar_sabah, "masa": get_random_azkar_masa, "nawm": get_random_azkar_nawm}
         text = funcs[data]()
@@ -443,21 +444,21 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text(footer_msg(), reply_markup=azkar_daily_keyboard())
         return
     elif data == "quran_menu":
-        await query.message.reply_text("القرآن الكريم 🤍\n\nاختر السورة لقراءتها:", reply_markup=quran_keyboard(0))
+        await query.message.reply_text("Ø§ÙÙØ±Ø¢Ù Ø§ÙÙØ±ÙÙ ð¤\n\nØ§Ø®ØªØ± Ø§ÙØ³ÙØ±Ø© ÙÙØ±Ø§Ø¡ØªÙØ§:", reply_markup=quran_keyboard(0))
     elif data.startswith("quran_p"):
         page = int(data[7:])
-        await query.message.reply_text("القرآن الكريم 🤍\n\nاختر السورة لقراءتها:", reply_markup=quran_keyboard(page))
+        await query.message.reply_text("Ø§ÙÙØ±Ø¢Ù Ø§ÙÙØ±ÙÙ ð¤\n\nØ§Ø®ØªØ± Ø§ÙØ³ÙØ±Ø© ÙÙØ±Ø§Ø¡ØªÙØ§:", reply_markup=quran_keyboard(page))
     elif data == "asma":
-        await query.message.reply_text("اسماء الله الحسنى 🤍\n\nاختر اسما لمعرفة معناه:", reply_markup=asma_keyboard(0))
+        await query.message.reply_text("Ø§Ø³ÙØ§Ø¡ Ø§ÙÙÙ Ø§ÙØ­Ø³ÙÙ ð¤\n\nØ§Ø®ØªØ± Ø§Ø³ÙØ§ ÙÙØ¹Ø±ÙØ© ÙØ¹ÙØ§Ù:", reply_markup=asma_keyboard(0))
     elif data.startswith("asma_p"):
         page = int(data[6:])
-        await query.message.reply_text("اسماء الله الحسنى 🤍\n\nاختر اسما لمعرفة معناه:", reply_markup=asma_keyboard(page))
+        await query.message.reply_text("Ø§Ø³ÙØ§Ø¡ Ø§ÙÙÙ Ø§ÙØ­Ø³ÙÙ ð¤\n\nØ§Ø®ØªØ± Ø§Ø³ÙØ§ ÙÙØ¹Ø±ÙØ© ÙØ¹ÙØ§Ù:", reply_markup=asma_keyboard(page))
     elif data.startswith("asma_") and not data.startswith("asma_p"):
         idx = int(data[5:])
         if 0 <= idx < len(ALLAH_NAMES):
             entry = ALLAH_NAMES[idx]
             page = idx // NAMES_PER_PAGE
-            text = f"{idx+1}. {entry['name']} 🤍\n\n{entry['meaning']}"
+            text = f"{idx+1}. {entry['name']} ð¤\n\n{entry['meaning']}"
             await query.message.reply_text(text)
             await query.message.reply_text(get_separator())
             await query.message.reply_text(footer_msg(), reply_markup=asma_keyboard(page))
@@ -466,43 +467,43 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer()
         return
     elif data == "prophets_menu" or data == "prophets_page1":
-        await query.message.reply_text("السيرة النبوية 🤍\n\nاختر نبيا لقراءة سيرته:", reply_markup=prophets_keyboard_page1())
+        await query.message.reply_text("Ø§ÙØ³ÙØ±Ø© Ø§ÙÙØ¨ÙÙØ© ð¤\n\nØ§Ø®ØªØ± ÙØ¨ÙØ§ ÙÙØ±Ø§Ø¡Ø© Ø³ÙØ±ØªÙ:", reply_markup=prophets_keyboard_page1())
     elif data == "prophets_page2":
-        await query.message.reply_text("السيرة النبوية 🤍\n\nاختر نبيا لقراءة سيرته:", reply_markup=prophets_keyboard_page2())
+        await query.message.reply_text("Ø§ÙØ³ÙØ±Ø© Ø§ÙÙØ¨ÙÙØ© ð¤\n\nØ§Ø®ØªØ± ÙØ¨ÙØ§ ÙÙØ±Ø§Ø¡Ø© Ø³ÙØ±ØªÙ:", reply_markup=prophets_keyboard_page2())
     elif data.startswith("prophet_") and not data.startswith("prophet_info_") and data[8:] in PROPHETS:
         prophet_key = data[8:]
         prophet = PROPHETS[prophet_key]
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("سيرته", callback_data=f"prophet_info_{prophet_key}_story")],
-            [InlineKeyboardButton("زوجاته", callback_data=f"prophet_info_{prophet_key}_wives")],
-            [InlineKeyboardButton("أولاده", callback_data=f"prophet_info_{prophet_key}_children")],
-            [InlineKeyboardButton("رجوع للأنبياء", callback_data="prophets_page1" if prophet_key in list(PROPHETS.keys())[:12] else "prophets_page2")],
-            [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")],
+            [InlineKeyboardButton("Ø³ÙØ±ØªÙ", callback_data=f"prophet_info_{prophet_key}_story")],
+            [InlineKeyboardButton("Ø²ÙØ¬Ø§ØªÙ", callback_data=f"prophet_info_{prophet_key}_wives")],
+            [InlineKeyboardButton("Ø£ÙÙØ§Ø¯Ù", callback_data=f"prophet_info_{prophet_key}_children")],
+            [InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙØ£ÙØ¨ÙØ§Ø¡", callback_data="prophets_page1" if prophet_key in list(PROPHETS.keys())[:12] else "prophets_page2")],
+            [InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu")],
         ])
-        await query.message.reply_text(f"{prophet['name']} 🤍\n\nاختر ما تريد معرفته:", reply_markup=keyboard)
+        await query.message.reply_text(f"{prophet['name']} ð¤\n\nØ§Ø®ØªØ± ÙØ§ ØªØ±ÙØ¯ ÙØ¹Ø±ÙØªÙ:", reply_markup=keyboard)
     elif data.startswith("prophet_info_"):
         parts = data[len("prophet_info_"):].rsplit("_", 1)
         prophet_key = parts[0]
         info_type = parts[1]
         if prophet_key in PROPHETS and info_type in ("story", "wives", "children"):
             prophet = PROPHETS[prophet_key]
-            text = prophet.get(info_type, "لا توجد معلومات متوفرة")
+            text = prophet.get(info_type, "ÙØ§ ØªÙØ¬Ø¯ ÙØ¹ÙÙÙØ§Øª ÙØªÙÙØ±Ø©")
             await query.message.reply_text(text)
             await query.message.reply_text(get_separator())
             keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton("سيرته", callback_data=f"prophet_info_{prophet_key}_story")],
-                [InlineKeyboardButton("زوجاته", callback_data=f"prophet_info_{prophet_key}_wives")],
-                [InlineKeyboardButton("أولاده", callback_data=f"prophet_info_{prophet_key}_children")],
-                [InlineKeyboardButton("رجوع للأنبياء", callback_data="prophets_page1" if prophet_key in list(PROPHETS.keys())[:12] else "prophets_page2")],
-                [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")],
+                [InlineKeyboardButton("Ø³ÙØ±ØªÙ", callback_data=f"prophet_info_{prophet_key}_story")],
+                [InlineKeyboardButton("Ø²ÙØ¬Ø§ØªÙ", callback_data=f"prophet_info_{prophet_key}_wives")],
+                [InlineKeyboardButton("Ø£ÙÙØ§Ø¯Ù", callback_data=f"prophet_info_{prophet_key}_children")],
+                [InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙØ£ÙØ¨ÙØ§Ø¡", callback_data="prophets_page1" if prophet_key in list(PROPHETS.keys())[:12] else "prophets_page2")],
+                [InlineKeyboardButton("Ø±Ø¬ÙØ¹ ÙÙÙØ§Ø¦ÙØ©", callback_data="menu")],
             ])
             await query.message.reply_text(footer_msg(), reply_markup=keyboard)
     elif data == "prayer_times":
-        await query.message.reply_text("اوقات الصلاة 🤍\n\nاختر المناطق او المدن:", reply_markup=prayer_times_keyboard())
+        await query.message.reply_text("Ø§ÙÙØ§Øª Ø§ÙØµÙØ§Ø© ð¤\n\nØ§Ø®ØªØ± Ø§ÙÙÙØ§Ø·Ù Ø§Ù Ø§ÙÙØ¯Ù:", reply_markup=prayer_times_keyboard())
     elif data == "pt_regions":
-        await query.message.reply_text("اختر المنطقة 🤍", reply_markup=regions_keyboard())
+        await query.message.reply_text("Ø§Ø®ØªØ± Ø§ÙÙÙØ·ÙØ© ð¤", reply_markup=regions_keyboard())
     elif data == "pt_cities":
-        await query.message.reply_text("اختر المدينة 🤍", reply_markup=cities_keyboard())
+        await query.message.reply_text("Ø§Ø®ØªØ± Ø§ÙÙØ¯ÙÙØ© ð¤", reply_markup=cities_keyboard())
     elif data.startswith("pt_") and data[3:] in {**SAUDI_REGIONS, **SAUDI_CITIES}:
         location_key = data[3:]
         text = get_prayer_times_for_location(location_key)
@@ -535,11 +536,11 @@ def _strip(text):
 
 
 SPECIAL_VERSES = {
-    "آية الكرسي": "KURSI",
-    "اية الكرسي": "KURSI",
-    "خواتيم البقرة": "KHAWATIM",
-    "خواتيم سورة البقرة": "KHAWATIM",
-    "خواتيم البقره": "KHAWATIM",
+    "Ø¢ÙØ© Ø§ÙÙØ±Ø³Ù": "KURSI",
+    "Ø§ÙØ© Ø§ÙÙØ±Ø³Ù": "KURSI",
+    "Ø®ÙØ§ØªÙÙ Ø§ÙØ¨ÙØ±Ø©": "KHAWATIM",
+    "Ø®ÙØ§ØªÙÙ Ø³ÙØ±Ø© Ø§ÙØ¨ÙØ±Ø©": "KHAWATIM",
+    "Ø®ÙØ§ØªÙÙ Ø§ÙØ¨ÙØ±Ù": "KHAWATIM",
 }
 
 
@@ -561,27 +562,27 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not ADMIN_IDS or (user_id and user_id in ADMIN_IDS):
             download_link = tiktok_links[0] if tiktok_links else insta_links[0]
             if tiktok_links and insta_links:
-                platform = "الانستقرام والتيك توك"
+                platform = "Ø§ÙØ§ÙØ³ØªÙØ±Ø§Ù ÙØ§ÙØªÙÙ ØªÙÙ"
             elif tiktok_links:
-                platform = "تيك توك"
+                platform = "ØªÙÙ ØªÙÙ"
             else:
-                platform = "انستقرام"
+                platform = "Ø§ÙØ³ØªÙØ±Ø§Ù"
 
             link_parts = []
             for l in all_social_links:
                 if "tiktok" in l:
-                    link_parts.append(f'<a href="{l}">تيك توك</a>')
+                    link_parts.append(f'<a href="{l}">ØªÙÙ ØªÙÙ</a>')
                 else:
-                    link_parts.append(f'<a href="{l}">انستقرام</a>')
-            links_text = " — ".join(link_parts)
-            caption = f"""مقطع جديد على {platform} 🤍
+                    link_parts.append(f'<a href="{l}">Ø§ÙØ³ØªÙØ±Ø§Ù</a>')
+            links_text = " â ".join(link_parts)
+            caption = f"""ÙÙØ·Ø¹ Ø¬Ø¯ÙØ¯ Ø¹ÙÙ {platform} ð¤
 
-لا تنسون تدعون لـ جدي وجدتي ولجميع اموات المسلمين 🤍
+ÙØ§ ØªÙØ³ÙÙ ØªØ¯Ø¹ÙÙ ÙÙ Ø¬Ø¯Ù ÙØ¬Ø¯ØªÙ ÙÙØ¬ÙÙØ¹ Ø§ÙÙØ§Øª Ø§ÙÙØ³ÙÙÙÙ ð¤
 
 {links_text}
 
 {get_date_line()}"""
-            wait_msg = await update.message.reply_text("جاري تحميل المقطع... 🤍")
+            wait_msg = await update.message.reply_text("Ø¬Ø§Ø±Ù ØªØ­ÙÙÙ Ø§ÙÙÙØ·Ø¹... ð¤")
             video_path = None
             try:
                 import yt_dlp
@@ -607,7 +608,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             parse_mode="HTML",
                             supports_streaming=True
                         )
-                    await wait_msg.edit_text("تم نشر المقطع في القناة 🤍")
+                    await wait_msg.edit_text("ØªÙ ÙØ´Ø± Ø§ÙÙÙØ·Ø¹ ÙÙ Ø§ÙÙÙØ§Ø© ð¤")
                 else:
                     await context.bot.send_message(
                         chat_id=CHANNEL_ID,
@@ -615,7 +616,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         parse_mode="HTML",
                         disable_web_page_preview=False
                     )
-                    await wait_msg.edit_text("تم نشر الرابط في القناة 🤍")
+                    await wait_msg.edit_text("ØªÙ ÙØ´Ø± Ø§ÙØ±Ø§Ø¨Ø· ÙÙ Ø§ÙÙÙØ§Ø© ð¤")
             except Exception as e:
                 logger.warning(f"Video download failed: {e}")
                 try:
@@ -625,43 +626,43 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         parse_mode="HTML",
                         disable_web_page_preview=False
                     )
-                    await wait_msg.edit_text("تم نشر الرابط في القناة 🤍")
+                    await wait_msg.edit_text("ØªÙ ÙØ´Ø± Ø§ÙØ±Ø§Ø¨Ø· ÙÙ Ø§ÙÙÙØ§Ø© ð¤")
                 except TelegramError as te:
-                    await wait_msg.edit_text(f"ما قدرت انشر المقطع: {te}")
+                    await wait_msg.edit_text(f"ÙØ§ ÙØ¯Ø±Øª Ø§ÙØ´Ø± Ø§ÙÙÙØ·Ø¹: {te}")
             finally:
                 if video_path and os.path.exists(video_path):
                     os.remove(video_path)
             return
 
-    if msg in ("اوقات الصلاة", "أوقات الصلاة", "الصلاة", "مواقيت الصلاة"):
+    if msg in ("Ø§ÙÙØ§Øª Ø§ÙØµÙØ§Ø©", "Ø£ÙÙØ§Øª Ø§ÙØµÙØ§Ø©", "Ø§ÙØµÙØ§Ø©", "ÙÙØ§ÙÙØª Ø§ÙØµÙØ§Ø©"):
         text = get_prayer_times_text()
         await update.message.reply_text(text)
         await update.message.reply_text(get_separator())
         await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
         return
 
-    if msg in ("اثر", "أثر", "القائمة", "المساعدة"):
+    if msg in ("Ø§Ø«Ø±", "Ø£Ø«Ø±", "Ø§ÙÙØ§Ø¦ÙØ©", "Ø§ÙÙØ³Ø§Ø¹Ø¯Ø©"):
         await update.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
         return
 
     simple_map = {
-        ("اذكار", "أذكار", "ذكر"): get_random_azkar,
-        ("اذكار الصباح", "أذكار الصباح", "صباح"): get_random_azkar_sabah,
-        ("اذكار المساء", "أذكار المساء", "مساء"): get_random_azkar_masa,
-        ("اذكار النوم", "أذكار النوم", "نوم"): get_random_azkar_nawm,
-        ("دعاء", "ادعية", "أدعية", "دعوة"): get_random_dua,
-        ("قصة", "قصص", "انبياء", "أنبياء", "نبي"): get_random_nabiy,
-        ("آية", "اية", "قرآن", "قران"): get_random_ayah,
-        ("صحابة", "صحابي", "صحابه"): get_random_sahabi,
-        ("قصة قرآنية", "قصص القرآن", "قصه قرآنيه", "قصص قرانيه"): get_random_quran_story,
-        ("ادعية الانبياء", "دعاء الانبياء", "دعاء نبي", "ادعيه الانبياء"): get_random_dua_nabi,
-        ("تحصين", "تحصين النفس", "تحصن"): get_random_tahseen,
-        ("حديث", "احاديث", "حديث نبوي", "أحاديث"): get_random_hadith,
-        ("اسماء الله", "اسماء الله الحسنى", "أسماء الله"): get_random_asma,
-        ("فضائل", "فضائل الاعمال", "فضل"): get_random_fadl,
-        ("اذكار الصلاة", "اذكار بعد الصلاة", "بعد الصلاة"): get_random_azkar_salah,
-        ("استغفار", "استغفر", "الاستغفار"): get_random_istighfar,
-        ("آداب", "اداب", "آداب اسلامية", "اداب اسلاميه"): get_random_adab,
+        ("Ø§Ø°ÙØ§Ø±", "Ø£Ø°ÙØ§Ø±", "Ø°ÙØ±"): get_random_azkar,
+        ("Ø§Ø°ÙØ§Ø± Ø§ÙØµØ¨Ø§Ø­", "Ø£Ø°ÙØ§Ø± Ø§ÙØµØ¨Ø§Ø­", "ØµØ¨Ø§Ø­"): get_random_azkar_sabah,
+        ("Ø§Ø°ÙØ§Ø± Ø§ÙÙØ³Ø§Ø¡", "Ø£Ø°ÙØ§Ø± Ø§ÙÙØ³Ø§Ø¡", "ÙØ³Ø§Ø¡"): get_random_azkar_masa,
+        ("Ø§Ø°ÙØ§Ø± Ø§ÙÙÙÙ", "Ø£Ø°ÙØ§Ø± Ø§ÙÙÙÙ", "ÙÙÙ"): get_random_azkar_nawm,
+        ("Ø¯Ø¹Ø§Ø¡", "Ø§Ø¯Ø¹ÙØ©", "Ø£Ø¯Ø¹ÙØ©", "Ø¯Ø¹ÙØ©"): get_random_dua,
+        ("ÙØµØ©", "ÙØµØµ", "Ø§ÙØ¨ÙØ§Ø¡", "Ø£ÙØ¨ÙØ§Ø¡", "ÙØ¨Ù"): get_random_nabiy,
+        ("Ø¢ÙØ©", "Ø§ÙØ©", "ÙØ±Ø¢Ù", "ÙØ±Ø§Ù"): get_random_ayah,
+        ("ØµØ­Ø§Ø¨Ø©", "ØµØ­Ø§Ø¨Ù", "ØµØ­Ø§Ø¨Ù"): get_random_sahabi,
+        ("ÙØµØ© ÙØ±Ø¢ÙÙØ©", "ÙØµØµ Ø§ÙÙØ±Ø¢Ù", "ÙØµÙ ÙØ±Ø¢ÙÙÙ", "ÙØµØµ ÙØ±Ø§ÙÙÙ"): get_random_quran_story,
+        ("Ø§Ø¯Ø¹ÙØ© Ø§ÙØ§ÙØ¨ÙØ§Ø¡", "Ø¯Ø¹Ø§Ø¡ Ø§ÙØ§ÙØ¨ÙØ§Ø¡", "Ø¯Ø¹Ø§Ø¡ ÙØ¨Ù", "Ø§Ø¯Ø¹ÙÙ Ø§ÙØ§ÙØ¨ÙØ§Ø¡"): get_random_dua_nabi,
+        ("ØªØ­ØµÙÙ", "ØªØ­ØµÙÙ Ø§ÙÙÙØ³", "ØªØ­ØµÙ"): get_random_tahseen,
+        ("Ø­Ø¯ÙØ«", "Ø§Ø­Ø§Ø¯ÙØ«", "Ø­Ø¯ÙØ« ÙØ¨ÙÙ", "Ø£Ø­Ø§Ø¯ÙØ«"): get_random_hadith,
+        ("Ø§Ø³ÙØ§Ø¡ Ø§ÙÙÙ", "Ø§Ø³ÙØ§Ø¡ Ø§ÙÙÙ Ø§ÙØ­Ø³ÙÙ", "Ø£Ø³ÙØ§Ø¡ Ø§ÙÙÙ"): get_random_asma,
+        ("ÙØ¶Ø§Ø¦Ù", "ÙØ¶Ø§Ø¦Ù Ø§ÙØ§Ø¹ÙØ§Ù", "ÙØ¶Ù"): get_random_fadl,
+        ("Ø§Ø°ÙØ§Ø± Ø§ÙØµÙØ§Ø©", "Ø§Ø°ÙØ§Ø± Ø¨Ø¹Ø¯ Ø§ÙØµÙØ§Ø©", "Ø¨Ø¹Ø¯ Ø§ÙØµÙØ§Ø©"): get_random_azkar_salah,
+        ("Ø§Ø³ØªØºÙØ§Ø±", "Ø§Ø³ØªØºÙØ±", "Ø§ÙØ§Ø³ØªØºÙØ§Ø±"): get_random_istighfar,
+        ("Ø¢Ø¯Ø§Ø¨", "Ø§Ø¯Ø§Ø¨", "Ø¢Ø¯Ø§Ø¨ Ø§Ø³ÙØ§ÙÙØ©", "Ø§Ø¯Ø§Ø¨ Ø§Ø³ÙØ§ÙÙÙ"): get_random_adab,
     }
 
     for keys, func in simple_map.items():
@@ -683,14 +684,17 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if len(msg) > 3:
         user_id = update.message.from_user.id if update.message.from_user else None
+        try:
         answer = ask_islamic_question(msg, user_id=user_id)
+    except:
+        answer = None
         if answer:
             await update.message.reply_text(answer)
             await update.message.reply_text(get_separator())
             await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
         else:
             await update.message.reply_text(
-                "لم اتمكن من الاجابة حاليا — حاول مرة اخرى 🤍",
+                "ÙÙ Ø§ØªÙÙÙ ÙÙ Ø§ÙØ§Ø¬Ø§Ø¨Ø© Ø­Ø§ÙÙØ§ â Ø­Ø§ÙÙ ÙØ±Ø© Ø§Ø®Ø±Ù ð¤",
                 reply_markup=back_keyboard()
             )
 
@@ -705,13 +709,13 @@ async def _delete_msgs(context: ContextTypes.DEFAULT_TYPE, chat_id, msg_id1, msg
 
 
 def channel_welcome():
-    return f"""نورتنا بين اهلك وناسك 🤍
+    return f"""ÙÙØ±ØªÙØ§ Ø¨ÙÙ Ø§ÙÙÙ ÙÙØ§Ø³Ù ð¤
 
-هنا مكانك ومحطتك للهدوء وطمأنينة القلب
+ÙÙØ§ ÙÙØ§ÙÙ ÙÙØ­Ø·ØªÙ ÙÙÙØ¯ÙØ¡ ÙØ·ÙØ£ÙÙÙØ© Ø§ÙÙÙØ¨
 
-وجودك معنا مو مجرد رقم هو "اثر" طيب يجمعنا على ذكر الله وقصص الخير
+ÙØ¬ÙØ¯Ù ÙØ¹ÙØ§ ÙÙ ÙØ¬Ø±Ø¯ Ø±ÙÙ ÙÙ "Ø§Ø«Ø±" Ø·ÙØ¨ ÙØ¬ÙØ¹ÙØ§ Ø¹ÙÙ Ø°ÙØ± Ø§ÙÙÙ ÙÙØµØµ Ø§ÙØ®ÙØ±
 
-صدقة جارية عن جدي وجدتي ولجميع اموات المسلمين 🫶🏻
+ØµØ¯ÙØ© Ø¬Ø§Ø±ÙØ© Ø¹Ù Ø¬Ø¯Ù ÙØ¬Ø¯ØªÙ ÙÙØ¬ÙÙØ¹ Ø§ÙÙØ§Øª Ø§ÙÙØ³ÙÙÙÙ ð«¶ð»
 
 {get_date_line()}"""
 
@@ -763,71 +767,71 @@ def build_application() -> Application:
     jq.run_daily(
         job_morning_azkar,
         time=datetime.time(5, 15, tzinfo=TIMEZONE),
-        name="اذكار الصباح"
+        name="Ø§Ø°ÙØ§Ø± Ø§ÙØµØ¨Ø§Ø­"
     )
 
     jq.run_daily(
         job_evening_azkar,
         time=datetime.time(18, 30, tzinfo=TIMEZONE),
-        name="اذكار المساء"
+        name="Ø§Ø°ÙØ§Ø± Ø§ÙÙØ³Ø§Ø¡"
     )
 
     jq.run_daily(
         job_sleep_azkar,
         time=datetime.time(21, 30, tzinfo=TIMEZONE),
-        name="اذكار النوم"
+        name="Ø§Ø°ÙØ§Ø± Ø§ÙÙÙÙ"
     )
 
     jq.run_daily(
         job_salawat,
         time=datetime.time(8, 30, tzinfo=TIMEZONE),
         days=(5,),
-        name="الصلاة على النبي"
+        name="Ø§ÙØµÙØ§Ø© Ø¹ÙÙ Ø§ÙÙØ¨Ù"
     )
 
     jq.run_daily(
         job_kahf,
         time=datetime.time(8, 30, tzinfo=TIMEZONE),
         days=(5,),
-        name="سورة الكهف"
+        name="Ø³ÙØ±Ø© Ø§ÙÙÙÙ"
     )
 
     jq.run_daily(
         job_istijaba,
         time=datetime.time(16, 30, tzinfo=TIMEZONE),
         days=(5,),
-        name="ساعة الاستجابة"
+        name="Ø³Ø§Ø¹Ø© Ø§ÙØ§Ø³ØªØ¬Ø§Ø¨Ø©"
     )
 
     jq.run_daily(
         job_social,
         time=datetime.time(20, 0, tzinfo=TIMEZONE),
         days=(5,),
-        name="حسابات التواصل"
+        name="Ø­Ø³Ø§Ø¨Ø§Øª Ø§ÙØªÙØ§ØµÙ"
     )
 
     jq.run_daily(
         job_schedule_prayer_alerts,
         time=datetime.time(1, 0, tzinfo=TIMEZONE),
-        name="جدولة تنبيهات الصلاة"
+        name="Ø¬Ø¯ÙÙØ© ØªÙØ¨ÙÙØ§Øª Ø§ÙØµÙØ§Ø©"
     )
 
     jq.run_once(
         job_schedule_prayer_alerts,
         when=5,
-        name="جدولة تنبيهات الصلاة الآن"
+        name="Ø¬Ø¯ÙÙØ© ØªÙØ¨ÙÙØ§Øª Ø§ÙØµÙØ§Ø© Ø§ÙØ¢Ù"
     )
 
     jq.run_daily(
         job_daily_story,
         time=datetime.time(16, 0, tzinfo=TIMEZONE),
-        name="قصة يومية"
+        name="ÙØµØ© ÙÙÙÙØ©"
     )
 
     jq.run_daily(
         job_daily_quiz,
         time=datetime.time(14, 0, tzinfo=TIMEZONE),
-        name="سؤال يومي"
+        name="Ø³Ø¤Ø§Ù ÙÙÙÙ"
     )
 
     logger.info("Application built with all handlers and scheduled jobs.")
@@ -836,5 +840,26 @@ def build_application() -> Application:
 if __name__ == "__main__":
     import asyncio
     application = build_application()
-    print("البوت بدأ العمل الآن... 🚀")
+    print("Ø§ÙØ¨ÙØª Ø¨Ø¯Ø£ Ø§ÙØ¹ÙÙ Ø§ÙØ¢Ù... ð")
     application.run_polling(drop_pending_updates=True, close_loop=False)
+
+
+def ask_islamic_question(question, user_id=None):
+    try:
+        url = "https://api.affiliateplus.xyz/api/chatbot"
+        params = {
+            "message": question,
+            "ownername": "Turki",
+            "botname": "IslamBot"
+        }
+        response = requests.get(url, params=params, timeout=8)
+        data = response.json()
+        if data.get("message"):
+            return data.get("message")
+    except:
+        pass
+
+    try:
+        return "Ø³Ø¤Ø§Ù Ø¬ÙÙÙ ð¤\nÙÙÙ Ø­Ø§ÙÙØ§Ù ÙØ§ Ø¹ÙØ¯Ù Ø¬ÙØ§Ø¨ Ø¯ÙÙÙ.\nØ¬Ø±Ø¨ ØªØ¹ÙØ¯ ØµÙØ§ØºØ© Ø§ÙØ³Ø¤Ø§Ù Ø¨Ø´ÙÙ Ø£ÙØ¶Ø­."
+    except:
+        return None
