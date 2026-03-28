@@ -391,10 +391,10 @@ async def show_athar_quran_page(update, context, page):
 
 def athar_surah_detail_kb(surah_num):
     url_read = f"https://peaceful-gelato-ac3634.netlify.app/surah.html?s={surah_num}"
-    buttons = [[InlineKeyboardButton("📖 اقرأ السورة", url=url_read)]]
-    for name, base in ATHAR_RECITERS:
-        buttons.append([InlineKeyboardButton(f"🎧 {name}", url=f"{base}{surah_num:03d}.mp3")])
-    buttons.append([InlineKeyboardButton("🔙 رجوع للسور", callback_data="athar_back_surahs")])
+    buttons = [
+        [InlineKeyboardButton("📖 اقرأ السورة", url=url_read)],
+        [InlineKeyboardButton("🔙 رجوع للسور", callback_data="athar_back_surahs")],
+    ]
     return InlineKeyboardMarkup(buttons)
 
 SEPARATOR_LINE = "═══ • ═══ ✨ ═══ • ═══"
