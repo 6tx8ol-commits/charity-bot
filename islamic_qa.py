@@ -13,20 +13,23 @@ SYSTEM_PROMPT = """عالم دين اسلامي متخصص ومحاور ودود
 - اذكر المصادر وباختصار مفيد
 - اذا لم تكن متأكدا قل: الله اعلم"""
 
+
 def ask_islamic_question(question, user_id=None):
     try:
-        model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
-            system_instruction=SYSTEM_PROMPT
-        )
+        import requests
+        url = "https://api.affiliateplus.xyz/api/chatbot"
+        params = {
+            "message": question,
+            "ownername": "Turki",
+            "botname": "IslamBot"
+        }
+        response = requests.get(url, params=params, timeout=8)
+        data = response.json()
+        if data.get("message"):
+            return data.get("message")
+    except:
+        pass
 
-        response = model.generate_content(question)
-
-        return response.text if response.text else "الله اعلم 🤍"
-
-    except Exception as e:
-        logger.error(f"Gemini error: {e}")
-        return "الله اعلم، حدث خطأ فني بسيط 🤍"
-
-def clear_history(user_id):
-    pass
+    return "سؤال جميل 🤍
+لكن حالياً ما عندي جواب دقيق.
+جرب تعيد صياغة السؤال بشكل أوضح."
