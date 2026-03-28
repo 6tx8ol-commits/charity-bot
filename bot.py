@@ -1,58 +1,5 @@
 import os
 import logging
-import google.generativeai as genai
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-GEMINI_KEY = "AIzaSyCKN106cSz4SsFVJZHfLswYJWLKYwFEgbw"
-genai.configure(api_key=GEMINI_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
-
-async def ask_islamic_question(question):
-    try:
-        SYSTEM_PROMPT = """أنت عالم دين إسلامي متخصص ومحاور ودود.
-القواعد:
-- أجب فقط على الأسئلة الدينية 🤍
-- لا تستخدم التشكيل ولا إيموجي ملونة - فقط 🤍
-- اذكر المصادر وباختصار مفيد
-- إذا لم تكن متأكداً قل: الله أعلم"""
-        
-        response = model.generate_content(f"{SYSTEM_PROMPT}\n\nالمستخدم: {question}")
-        return response.text
-    except Exception as e:
-        logger.error(f"Gemini error: {e}")
-        return "الله أعلم، حدث خطأ فني بسيط 🤍"
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = update.message.text
-    if not msg:
-        return
-
-    if len(msg) > 3:
-        answer = await ask_islamic_question(msg)
-        await update.message.reply_text(answer)
-    else:
-        await update.message.reply_text("تفضل، اسأل سؤالك الديني وسأجيبك بإذن الله 🤍")
-
-def build_application():
-    TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-    return app
-
-if __name__ == "__main__":
-    import asyncio
-    application = build_application()
-    print("🚀 البوت بدأ العمل الآن...")
-    application.run_polling(drop_pending_updates=True)
-
-
-
-import os
-import logging
 import datetime
 import unicodedata
 from zoneinfo import ZoneInfo
