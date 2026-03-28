@@ -112,48 +112,20 @@ def get_date_line():
 
 
 def main_keyboard():
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("📖 القرآن الكريم", callback_data="quran_menu")],
-        [
-            InlineKeyboardButton("🌿 الاذكار اليومية", callback_data="azkar_daily"),
-            InlineKeyboardButton("🤲 دعاء", callback_data="dua"),
-        ],
-        [
-            InlineKeyboardButton("🕊️ ادعية الانبياء", callback_data="dua_nabi"),
-            InlineKeyboardButton("✨ آية قرآنية", callback_data="ayah"),
-        ],
-        [
-            InlineKeyboardButton("🌙 السيرة النبوية", callback_data="prophets_menu"),
-            InlineKeyboardButton("⭐ قصة صحابي", callback_data="sahabi"),
-        ],
-        [
-            InlineKeyboardButton("📜 قصة قرآنية", callback_data="quran_story"),
-            InlineKeyboardButton("💎 الباقيات الصالحات", callback_data="baqiyat"),
-        ],
-        [
-            InlineKeyboardButton("🛡️ تحصين النفس", callback_data="tahseen"),
-            InlineKeyboardButton("🔵 آية الكرسي", callback_data="kursi"),
-        ],
-        [
-            InlineKeyboardButton("📚 حديث نبوي", callback_data="hadith"),
-            InlineKeyboardButton("🌟 اسماء الله الحسنى", callback_data="asma"),
-        ],
-        [
-            InlineKeyboardButton("🌸 فضائل الاعمال", callback_data="fadail"),
-            InlineKeyboardButton("🕌 اذكار بعد الصلاة", callback_data="azkar_salah"),
-        ],
-        [
-            InlineKeyboardButton("💫 الاستغفار", callback_data="istighfar"),
-            InlineKeyboardButton("🌺 آداب اسلامية", callback_data="adab"),
-        ],
-        [InlineKeyboardButton("🕐 اوقات الصلاة", callback_data="prayer_times")],
-        [InlineKeyboardButton("🌐 الموقع الرسمي", url="https://legendary-yeot-b80ee7.netlify.app/")],
-        [InlineKeyboardButton("📢 قناة اثر", url="https://t.me/Athar_Atkar")],
-        [
-            InlineKeyboardButton("📸 انستقرام", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
-            InlineKeyboardButton("🎬 تيك توك", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4"),
-        ],
-    ])
+    return ReplyKeyboardMarkup([
+        ["📖 القرآن الكريم"],
+        ["🌿 الاذكار اليومية", "🤲 دعاء"],
+        ["🕊️ ادعية الانبياء", "✨ آية قرآنية"],
+        ["🌙 السيرة النبوية", "⭐ قصة صحابي"],
+        ["📜 قصة قرآنية", "💎 الباقيات الصالحات"],
+        ["🛡️ تحصين النفس", "🔵 آية الكرسي"],
+        ["📚 حديث نبوي", "🌟 اسماء الله الحسنى"],
+        ["🌸 فضائل الاعمال", "🕌 اذكار بعد الصلاة"],
+        ["💫 الاستغفار", "🌺 آداب اسلامية"],
+        ["🕐 اوقات الصلاة"],
+        ["🌐 الموقع الرسمي", "📢 قناة اثر"],
+        ["📸 انستقرام", "🎬 تيك توك"],
+    ], resize_keyboard=True)
 
 
 def back_keyboard():
@@ -524,6 +496,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "menu":
         await query.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
+        return
     elif data == "azkar_daily":
         await query.message.reply_text("الاذكار اليومية 🤍\n\nاختر:", reply_markup=azkar_daily_keyboard())
     elif data in ("sabah", "masa", "nawm"):
@@ -719,6 +692,73 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if msg in ("اثر", "أثر", "القائمة", "المساعدة", "🔙 القائمة الرئيسية"):
         await update.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
+        return
+
+    # ══ أزرار القائمة الرئيسية ══
+    async def _send(func):
+        text = func()
+        await update.message.reply_text(text)
+        await update.message.reply_text(get_separator())
+        await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
+
+    if msg == "📖 القرآن الكريم":
+        await show_athar_quran_page(update, context, 0)
+        return
+    if msg == "🌿 الاذكار اليومية":
+        await update.message.reply_text("الاذكار اليومية 🤍\n\nاختر:", reply_markup=azkar_daily_keyboard())
+        return
+    if msg == "🤲 دعاء":
+        await _send(get_random_dua); return
+    if msg == "🕊️ ادعية الانبياء":
+        await _send(get_random_dua_nabi); return
+    if msg == "✨ آية قرآنية":
+        await _send(get_random_ayah); return
+    if msg == "🌙 السيرة النبوية":
+        await update.message.reply_text("السيرة النبوية 🤍\n\nاختر نبيا لقراءة سيرته:", reply_markup=prophets_keyboard_page1())
+        return
+    if msg == "⭐ قصة صحابي":
+        await _send(get_random_sahabi); return
+    if msg == "📜 قصة قرآنية":
+        await _send(get_random_quran_story); return
+    if msg == "💎 الباقيات الصالحات":
+        await update.message.reply_text(BAQIYAT)
+        await update.message.reply_text(get_separator())
+        await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
+        return
+    if msg == "🛡️ تحصين النفس":
+        await _send(get_random_tahseen); return
+    if msg == "🔵 آية الكرسي":
+        await update.message.reply_text(AYAT_KURSI)
+        await update.message.reply_text(get_separator())
+        await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
+        return
+    if msg == "📚 حديث نبوي":
+        await _send(get_random_hadith); return
+    if msg == "🌟 اسماء الله الحسنى":
+        await update.message.reply_text("اسماء الله الحسنى 🤍\n\nاختر اسما لمعرفة معناه:", reply_markup=asma_keyboard(0))
+        return
+    if msg == "🌸 فضائل الاعمال":
+        await _send(get_random_fadl); return
+    if msg == "🕌 اذكار بعد الصلاة":
+        await _send(get_random_azkar_salah); return
+    if msg == "💫 الاستغفار":
+        await _send(get_random_istighfar); return
+    if msg == "🌺 آداب اسلامية":
+        await _send(get_random_adab); return
+    if msg == "🕐 اوقات الصلاة":
+        await update.message.reply_text("اوقات الصلاة 🤍\n\nاختر:", reply_markup=prayer_times_keyboard())
+        return
+    if msg == "🌐 الموقع الرسمي":
+        await update.message.reply_text("🌐 الموقع الرسمي:", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("فتح الموقع", url="https://legendary-yeot-b80ee7.netlify.app/")]]))
+        return
+    if msg == "📢 قناة اثر":
+        await update.message.reply_text("📢 قناة اثر:", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("فتح القناة", url="https://t.me/Athar_Atkar")]]))
+        return
+    if msg == "📸 انستقرام":
+        await update.message.reply_text("📸 انستقرام:", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("فتح الصفحة", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr")]]))
+        return
+    if msg == "🎬 تيك توك":
+        await update.message.reply_text("🎬 تيك توك:", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("فتح الصفحة", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4")]]))
         return
 
     if "athar_quran_page" in context.user_data:
