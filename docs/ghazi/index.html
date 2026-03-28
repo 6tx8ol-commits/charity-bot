@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بوت أذكار عجاج — صدقة جارية عن الأستاذ غازي عجاج</title>
+  <meta name="description" content="بوت تيليغرام للأذكار الإسلامية صدقة جارية عن روح الأستاذ غازي عجاج رحمه الله. أذكار صباح ومساء، قرآن كريم، سيرة نبوية، أوقات الصلاة وأكثر.">
+  <meta name="keywords" content="بوت أذكار, أذكار الصباح, أذكار المساء, قرآن, سيرة نبوية, صدقة جارية, غازي عجاج, تيليغرام">
+  <meta property="og:title" content="بوت أذكار عجاج">
+  <meta property="og:description" content="صدقة جارية عن روح الأستاذ غازي عجاج رحمه الله 🤍">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: #080c10;
+      color: #e8e0d0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at top, #0d1b2a 0%, #080c10 70%);
+      z-index: -1;
+    }
+    header {
+      width: 100%;
+      text-align: center;
+      padding: 60px 20px 40px;
+      border-bottom: 1px solid rgba(100,160,220,0.15);
+    }
+    .bismillah {
+      font-family: 'Amiri', serif;
+      font-size: 1.4rem;
+      color: #7ab3e0;
+      margin-bottom: 20px;
+      opacity: 0.85;
+    }
+    .logo {
+      font-family: 'Amiri', serif;
+      font-size: 3rem;
+      color: #7ab3e0;
+      margin-bottom: 10px;
+      text-shadow: 0 0 30px rgba(100,160,220,0.3);
+    }
+    .tagline {
+      font-size: 1rem;
+      color: #6a7a8a;
+      font-weight: 300;
+    }
+    main {
+      max-width: 700px;
+      width: 100%;
+      padding: 50px 20px;
+    }
+    .memorial {
+      text-align: center;
+      background: rgba(100,160,220,0.05);
+      border: 1px solid rgba(100,160,220,0.15);
+      border-radius: 16px;
+      padding: 40px 30px;
+      margin-bottom: 40px;
+    }
+    .memorial .icon { font-size: 2.5rem; margin-bottom: 15px; }
+    .memorial h2 {
+      font-family: 'Amiri', serif;
+      font-size: 1.8rem;
+      color: #7ab3e0;
+      margin-bottom: 10px;
+      line-height: 1.8;
+    }
+    .memorial .subtitle {
+      color: #5a8aaa;
+      font-size: 0.95rem;
+      margin-bottom: 15px;
+    }
+    .memorial p {
+      color: #8a9aaa;
+      line-height: 2;
+      font-size: 1rem;
+    }
+    .memorial .dua {
+      font-family: 'Amiri', serif;
+      font-size: 1.05rem;
+      color: #7ab3e0;
+      margin-top: 20px;
+      line-height: 2;
+      opacity: 0.9;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 40px;
+    }
+    .feature {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(100,160,220,0.08);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .feature .icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .feature h3 { font-size: 0.95rem; color: #7ab3e0; margin-bottom: 5px; }
+    .feature p { font-size: 0.8rem; color: #4a5a6a; }
+    .cta { text-align: center; margin-bottom: 40px; }
+    .btn {
+      display: inline-block;
+      padding: 16px 40px;
+      background: linear-gradient(135deg, #4a90c4, #2a6090);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(74,144,196,0.3);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(74,144,196,0.4); }
+    .btn.secondary {
+      background: transparent;
+      color: #7ab3e0;
+      border: 1px solid rgba(100,160,220,0.3);
+      box-shadow: none;
+    }
+    .other-bot {
+      text-align: center;
+      padding: 30px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      margin-top: 20px;
+    }
+    .other-bot p { color: #4a5a6a; margin-bottom: 15px; font-size: 0.9rem; }
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 30px 20px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      color: #3a4a5a;
+      font-size: 0.8rem;
+    }
+    footer a { color: #4a6a8a; text-decoration: none; }
+    @media (max-width: 480px) {
+      .logo { font-size: 2.2rem; }
+      .features { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header>
+    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+    <div class="logo">بوت الأذكار</div>
+    <div class="tagline">أذكار إسلامية يومية — صباحاً ومساءً وليلاً</div>
+  </header>
+
+  <main>
+    <div class="memorial">
+      <div class="icon">🕊️</div>
+      <h2>الأستاذ غازي عجاج</h2>
+      <div class="subtitle">رحمه الله وأسكنه فسيح جناته</div>
+      <p>هذا البوت صدقة جارية عن روحه الطاهرة<br>نسأل الله أن يجعله في ميزان حسناته<br>وأن ينور قبره ويرحمه برحمته الواسعة</p>
+      <div class="dua">اللهم اغفر له وارحمه وعافه واعف عنه<br>وأكرم نزله ووسع مدخله<br>واجمعنا به في جنات النعيم 🤍</div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="icon">🌅</div>
+        <h3>أذكار الصباح</h3>
+        <p>ابدأ يومك بذكر الله</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🌙</div>
+        <h3>أذكار المساء</h3>
+        <p>أختم يومك بذكر الله</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📖</div>
+        <h3>القرآن الكريم</h3>
+        <p>استمع لأجمل التلاوات</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🕌</div>
+        <h3>أوقات الصلاة</h3>
+        <p>لجميع مناطق السعودية</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🌟</div>
+        <h3>أسماء الله الحسنى</h3>
+        <p>تعرف على أسماء الله</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📚</div>
+        <h3>السيرة النبوية</h3>
+        <p>تعلم سيرة النبي ﷺ</p>
+      </div>
+    </div>
+
+    <div class="cta">
+      <a href="https://t.me/AzkarAjajBot" class="btn">ابدأ مع البوت 🤍</a>
+    </div>
+
+    <div class="other-bot">
+      <p>تبحث عن بوت أثر؟</p>
+      <a href="/charity-bot/" class="btn secondary">بوت أثر | أذكار</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>جميع الحقوق محفوظة — صدقة جارية عن روح الأستاذ غازي عجاج 🤍</p>
+  </footer>
+</body>
+</html>
