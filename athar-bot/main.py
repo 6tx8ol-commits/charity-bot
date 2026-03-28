@@ -71,44 +71,44 @@ def get_date_line():
 
 def main_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("القرآن الكريم", callback_data="quran_menu")],
+        [InlineKeyboardButton("📖 القرآن الكريم", callback_data="quran_menu")],
         [
-            InlineKeyboardButton("الاذكار اليومية", callback_data="azkar_daily"),
-            InlineKeyboardButton("دعاء", callback_data="dua"),
+            InlineKeyboardButton("🌿 الاذكار اليومية", callback_data="azkar_daily"),
+            InlineKeyboardButton("🤲 دعاء", callback_data="dua"),
         ],
         [
-            InlineKeyboardButton("ادعية الانبياء", callback_data="dua_nabi"),
-            InlineKeyboardButton("آية قرآنية", callback_data="ayah"),
+            InlineKeyboardButton("🕊️ ادعية الانبياء", callback_data="dua_nabi"),
+            InlineKeyboardButton("✨ آية قرآنية", callback_data="ayah"),
         ],
         [
-            InlineKeyboardButton("السيرة النبوية", callback_data="prophets_menu"),
-            InlineKeyboardButton("قصة صحابي", callback_data="sahabi"),
+            InlineKeyboardButton("🌙 السيرة النبوية", callback_data="prophets_menu"),
+            InlineKeyboardButton("⭐ قصة صحابي", callback_data="sahabi"),
         ],
         [
-            InlineKeyboardButton("قصة قرآنية", callback_data="quran_story"),
-            InlineKeyboardButton("الباقيات الصالحات", callback_data="baqiyat"),
+            InlineKeyboardButton("📜 قصة قرآنية", callback_data="quran_story"),
+            InlineKeyboardButton("💎 الباقيات الصالحات", callback_data="baqiyat"),
         ],
         [
-            InlineKeyboardButton("تحصين النفس", callback_data="tahseen"),
-            InlineKeyboardButton("آية الكرسي", callback_data="kursi"),
+            InlineKeyboardButton("🛡️ تحصين النفس", callback_data="tahseen"),
+            InlineKeyboardButton("🔵 آية الكرسي", callback_data="kursi"),
         ],
         [
-            InlineKeyboardButton("حديث نبوي", callback_data="hadith"),
-            InlineKeyboardButton("اسماء الله الحسنى", callback_data="asma"),
+            InlineKeyboardButton("📚 حديث نبوي", callback_data="hadith"),
+            InlineKeyboardButton("🌟 اسماء الله الحسنى", callback_data="asma"),
         ],
         [
-            InlineKeyboardButton("فضائل الاعمال", callback_data="fadail"),
-            InlineKeyboardButton("اذكار بعد الصلاة", callback_data="azkar_salah"),
+            InlineKeyboardButton("🌸 فضائل الاعمال", callback_data="fadail"),
+            InlineKeyboardButton("🕌 اذكار بعد الصلاة", callback_data="azkar_salah"),
         ],
         [
-            InlineKeyboardButton("الاستغفار", callback_data="istighfar"),
-            InlineKeyboardButton("آداب اسلامية", callback_data="adab"),
+            InlineKeyboardButton("💫 الاستغفار", callback_data="istighfar"),
+            InlineKeyboardButton("🌺 آداب اسلامية", callback_data="adab"),
         ],
-        [InlineKeyboardButton("اوقات الصلاة", callback_data="prayer_times")],
-        [InlineKeyboardButton("قناة اثر", url="https://t.me/Athar_Atkar")],
+        [InlineKeyboardButton("🕐 اوقات الصلاة", callback_data="prayer_times")],
+        [InlineKeyboardButton("📢 قناة اثر", url="https://t.me/Athar_Atkar")],
         [
-            InlineKeyboardButton("انستقرام", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
-            InlineKeyboardButton("تيك توك", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4"),
+            InlineKeyboardButton("📸 انستقرام", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
+            InlineKeyboardButton("🎵 تيك توك", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4"),
         ],
     ])
 
@@ -120,9 +120,9 @@ def back_keyboard():
 
 def azkar_daily_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("اذكار الصباح", callback_data="sabah")],
-        [InlineKeyboardButton("اذكار المساء", callback_data="masa")],
-        [InlineKeyboardButton("اذكار النوم", callback_data="nawm")],
+        [InlineKeyboardButton("🌅 اذكار الصباح", callback_data="sabah")],
+        [InlineKeyboardButton("🌙 اذكار المساء", callback_data="masa")],
+        [InlineKeyboardButton("😴 اذكار النوم", callback_data="nawm")],
         [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")],
     ])
 
