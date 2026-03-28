@@ -11,7 +11,7 @@ from hijridate import Gregorian
 
 from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
-    Application, CommandHandler, MessageHandler,
+    Application, CommandHandler, MessageHandler, CallbackQueryHandler,
     ContextTypes, filters,
 )
 from telegram.constants import ParseMode
@@ -271,34 +271,53 @@ async def route_main(update, context, txt):
 #  QURAN
 # ═══════════════════════════════════════════════════════
 
+GHAZI_SURAHS_PER_PAGE = 12
+
+def ghazi_quran_keyboard(page=0):
+    total_pages = (len(SURAHS) + GHAZI_SURAHS_PER_PAGE - 1) // GHAZI_SURAHS_PER_PAGE
+    start = page * GHAZI_SURAHS_PER_PAGE
+    end   = min(start + GHAZI_SURAHS_PER_PAGE, len(SURAHS))
+    buttons = []
+    for i in range(start, end, 3):
+        row = []
+        for s in SURAHS[i:min(i+3, end)]:
+            url = f"https://6tx8ol-commits.github.io/charity-bot/ghazi/surah.html?s={s['number']}"
+            row.append(InlineKeyboardButton(f"{s['number']}. {s['name']}", url=url))
+        buttons.append(row)
+    nav = []
+    if page > 0:
+        nav.append(InlineKeyboardButton("→ السابق", callback_data=f"gquran_p{page-1}"))
+    nav.append(InlineKeyboardButton(f"{page+1}/{total_pages}", callback_data="noop"))
+    if page < total_pages - 1:
+        nav.append(InlineKeyboardButton("التالي ←", callback_data=f"gquran_p{page+1}"))
+    buttons.append(nav)
+    return InlineKeyboardMarkup(buttons)
+
 async def show_quran_menu(update, context):
     set_state(context, "quran")
-    rows = [
-        ["📚 قائمة السور الـ 114"],
-        ["🎯 سور مشهورة"],
-        ["🌐 اقرأ القرآن (quran.com)"],
-        [BACK_MAIN],
-    ]
-    await reply(
-        update,
-        "📖 *القرآن الكريم*\n\n"
+    await update.effective_message.reply_text(
+        "📖 القرآن الكريم 🤍\n\n"
         "﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾\n\n"
-        "اختر:",
-        kb(rows),
+        "اختر السورة لقراءتها:",
+        reply_markup=ghazi_quran_keyboard(0),
     )
+
+async def handle_ghazi_quran_callback(update, context):
+    query = update.callback_query
+    await query.answer()
+    if query.data == "noop":
+        return
+    if query.data.startswith("gquran_p"):
+        page = int(query.data.replace("gquran_p", ""))
+        await query.message.edit_reply_markup(reply_markup=ghazi_quran_keyboard(page))
 
 async def route_quran(update, context, txt):
     if txt == "📚 قائمة السور الـ 114":
-        await show_surah_page(update, context, 0)
+        await show_quran_menu(update, context)
     elif txt == "🎯 سور مشهورة":
         await show_selected_surahs(update, context)
     elif txt == "🌐 اقرأ القرآن (quran.com)":
-        await reply(
-            update,
-            "📖 اضغط الرابط لقراءة القرآن الكريم:\n\nhttps://peaceful-gelato-ac3634.netlify.app/",
-            kb([[BACK_MAIN]]),
-            md=False,
-        )
+        await show_quran_menu(update, context)
 
 def surah_page_rows(page):
     per   = 9
@@ -1135,6 +1154,7 @@ def main():
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("menu",  cmd_start))
     app.add_handler(CommandHandler("users", cmd_users))
+    app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(gquran_p\d+|noop)$"))
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_msg
     ))
