@@ -362,7 +362,7 @@ async def show_athar_quran_page(update, context, page):
     )
 
 def athar_surah_detail_kb(surah_num):
-    url_read = f"https://peaceful-gelato-ac3634.netlify.app/surah.html?s={surah_num}"
+    url_read = f"https://peaceful-gelato-ac3634.netlify.app/surah?s={surah_num}"
     buttons = [
         [InlineKeyboardButton("📖 اقرأ السورة", url=url_read)],
         [InlineKeyboardButton("🔙 رجوع للسور", callback_data="athar_back_surahs")],
