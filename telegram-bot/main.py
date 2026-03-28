@@ -295,7 +295,7 @@ async def route_quran(update, context, txt):
     elif txt == "🌐 اقرأ القرآن (quran.com)":
         await reply(
             update,
-            "📖 اضغط الرابط لقراءة القرآن الكريم:\n\nhttps://6tx8ol-commits.github.io/charity-bot/ghazi/",
+            "📖 اضغط الرابط لقراءة القرآن الكريم:\n\nhttps://peaceful-gelato-ac3634.netlify.app/",
             kb([[BACK_MAIN]]),
             md=False,
         )
@@ -342,7 +342,7 @@ async def route_surah_page(update, context, txt, s):
                 f"🔢 رقمها: *{surah['number']}*\n"
                 f"📝 آياتها: *{surah['verses']}* آية\n"
                 f"🕌 نوعها: *{surah['type']}*\n\n"
-                f"🌐 اقرأها: https://6tx8ol-commits.github.io/charity-bot/ghazi/surah.html?s={surah['number']}\n\n"
+                f"🌐 اقرأها: https://peaceful-gelato-ac3634.netlify.app/surah.html?s={surah['number']}\n\n"
                 f"🎧 *الاستماع:*\n"
                 f"• محمد أيوب: https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/{surah['number']:03d}.mp3\n"
                 f"• سعود الشريم: https://server7.mp3quran.net/shur/{surah['number']:03d}.mp3\n"
