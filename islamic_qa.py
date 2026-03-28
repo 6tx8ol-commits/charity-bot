@@ -1,47 +1,128 @@
 import os
 import logging
-import google.generativeai as genai
+import time
+from openai import OpenAI
 
 logger = logging.getLogger(__name__)
 
-GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
+client = None
+conversation_history = {}
+MAX_HISTORY = 10
+HISTORY_TIMEOUT = 1800  # 30 دقيقة
 
-if not GEMINI_KEY:
-    logger.error("GEMINI_API_KEY غير موجود!")
-    genai.configure(api_key="dummy")
-else:
-    genai.configure(api_key=GEMINI_KEY)
 
-SYSTEM_PROMPT = """أنت عالم دين إسلامي متخصص وودود ودقيق.
-أجب على الأسئلة الدينية والسيرة والقرآن والحديث والفقه بطريقة واضحة، مباشرة، ومفيدة.
-استخدم لغة عربية فصحى سهلة.
-إذا أمكن اذكر المصدر باختصار (مثل: رواه البخاري، سورة البقرة آية 255...).
-لا ترفض أي سؤال ديني.
-كن مختصراً قدر الإمكان ومفيداً.
-استخدم 🤍 فقط في نهاية الرد."""
-
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    system_instruction=SYSTEM_PROMPT,
-    generation_config={
-        "temperature": 0.7,
-        "max_output_tokens": 1200,
-    }
-)
-
-def ask_islamic_question(question: str, user_id=None):
-    try:
-        prompt = f"السؤال: {question}\n\nأجب بطريقة واضحة ومفيدة:"
-
-        response = model.generate_content(prompt)
-
-        if response and response.text:
-            answer = response.text.strip()
-            if len(answer) > 20:          # للتأكد أن الرد مفيد
-                return answer + "\n\n🤍"
+def _get_client():
+    global client
+    if client is None:
+        base_url = os.environ.get("AI_INTEGRATIONS_OPENAI_BASE_URL")
+        api_key = os.environ.get("AI_INTEGRATIONS_OPENAI_API_KEY")
         
-        return "الله أعلم 🤍"
+        if base_url and api_key:
+            client = OpenAI(base_url=base_url, api_key=api_key)
+        else:
+            client = OpenAI()
+    return client
+
+
+SYSTEM_PROMPT = """انت عالم دين اسلامي متخصص ومحاور ودود. تتحاور مع المستخدم وتجيب على اسئلته الدينية.
+
+القواعد:
+- اجب فقط على الاسئلة المتعلقة بالاسلام والقرآن والسنة والانبياء والصحابة والفقه والعقيدة
+- استند في اجاباتك على القرآن الكريم والسنة النبوية الصحيحة واقوال العلماء المعتبرين
+- لا تستخدم الحركات (التشكيل) في النص العربي
+- لا تستخدم ايموجي ملونة — فقط 🤍
+- اذا كان السؤال غير ديني قل: هذا البوت مخصص للمحتوى الديني فقط 🤍
+- اجب بشكل مختصر ومفيد ولا تطيل كثيرا
+- اذكر المصدر اذا كان من القرآن او الحديث
+- لا تفتي في مسائل خلافية معقدة بل انصح بسؤال اهل العلم
+
+قواعد النقاش والتصحيح:
+- اذا ارسل المستخدم معلومة دينية خاطئة وانت متاكد انها خاطئة فصححها بادب ولطف مع ذكر الدليل من القرآن او السنة
+- اذا ارسل معلومة صحيحة امدحه وشجعه وزده علما
+- اذا كانت المعلومة فيها خلاف بين العلماء وضح ذلك ولا تجزم
+- تذكر سياق المحادثة السابقة مع المستخدم وارجع لها عند الحاجة
+- كن كأنك تتحاور مع صديق تحبه وتريد له الخير
+- اذا لم تكن متاكدا من معلومة لا تجزم بها وقل: الله اعلم، وانصح بالرجوع لاهل العلم"""
+
+
+def _get_history(user_id):
+    now = time.time()
+    if user_id in conversation_history:
+        data = conversation_history[user_id]
+        if now - data["last_time"] > HISTORY_TIMEOUT:
+            conversation_history[user_id] = {"messages": [], "last_time": now}
+        else:
+            data["last_time"] = now
+    else:
+        conversation_history[user_id] = {"messages": [], "last_time": now}
+    
+    return conversation_history[user_id]["messages"]
+
+
+def _trim_history(messages):
+    if len(messages) > MAX_HISTORY * 2:
+        return messages[-(MAX_HISTORY * 2):]
+    return messages
+
+
+def clear_history(user_id):
+    """مسح تاريخ المحادثة لمستخدم معين"""
+    if user_id in conversation_history:
+        del conversation_history[user_id]
+
+
+def ask_islamic_question(question: str, user_id: str = None) -> str:
+    """
+    إرسال سؤال ديني إلى النموذج مع دعم الذاكرة
+    """
+    try:
+        c = _get_client()
+
+        if user_id:
+            history = _get_history(user_id)
+            history.append({"role": "user", "content": question})
+            history = _trim_history(history)
+            conversation_history[user_id]["messages"] = history
+
+            messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history
+        else:
+            messages = [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": question}
+            ]
+
+        response = c.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=1000,
+            temperature=0.3,
+            timeout=30,           # مهم لتجنب التعليق
+        )
+
+        answer = response.choices[0].message.content
+
+        # حفظ الرد في التاريخ
+        if user_id:
+            history.append({"role": "assistant", "content": answer})
+            conversation_history[user_id]["messages"] = _trim_history(history)
+
+        return answer
 
     except Exception as e:
-        logger.error(f"خطأ في Gemini: {str(e)}")
-        return "حدث خطأ فني بسيط، حاول مرة أخرى 🤍"
+        logger.error(f"AI Q&A error: {e}")
+        return "عذرا، حدث خطأ فني أثناء معالجة السؤال. يرجى المحاولة مرة أخرى 🤍"
+
+
+# دوال مساعدة إضافية
+def get_conversation_length(user_id: str) -> int:
+    """إرجاع عدد الرسائل في تاريخ المحادثة"""
+    if user_id in conversation_history:
+        return len(conversation_history[user_id]["messages"])
+    return 0
+
+
+def is_history_active(user_id: str) -> bool:
+    """التحقق ما إذا كان تاريخ المحادثة لا يزال نشطاً"""
+    if user_id in conversation_history:
+        return time.time() - conversation_history[user_id]["last_time"] < HISTORY_TIMEOUT
+    return False
