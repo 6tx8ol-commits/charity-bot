@@ -22,7 +22,8 @@ async def ask_islamic_question(question, user_id=None):
         )
 
         # نستخدم await هنا
-        response = model.generate_content(prompt)
+       response = await model.generate_content_async(prompt)
+
         return response.text
     except Exception as e:
         logger.error(f"Gemini error: {e}")
