@@ -4,20 +4,25 @@ import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+# حطينا مفتاحك هنا مباشرة عشان نضمن يشتغل فوراً
+GEMINI_KEY = "AIzaSyCKN106cSz4SsFVJZHfLswYJWLKYwFEgbw"
+genai.configure(api_key=GEMINI_KEY)
 
-def ask_islamic_question(question, user_id=None):
+# أضفنا async هنا عشان يتوافق مع البوت
+async def ask_islamic_question(question, user_id=None):
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
         
-        SYSTEM_PROMPT = """عالم دين اسلامي متخصص ومحاور ودود
-:القواعد
-- اجب فقط على الاسئلة الدينية 🤍
-- لا تستخدم التشكيل ولا ايموجي ملونة - فقط 🤍
-- اذكر المصادر وباختصار مفيد
-- اذا لم تكن متأكدا قل: الله اعلم"""
+        # ترتيب البرومبت عشان ما يتلخبط الذكاء
+        prompt = (
+            "أنت عالم دين إسلامي متخصص ومحاور ودود. "
+            "القواعد: أجب فقط على الأسئلة الدينية. لا تستخدم التشكيل ولا إيموجي ملونة - فقط 🤍. "
+            "اذكر المصادر وباختصار مفيد. إذا لم تكن متأكداً قل: الله أعلم.\n\n"
+            f"السؤال: {question}"
+        )
 
-        response = model.generate_content(f"{SYSTEM_PROMPT}\n\nالمستخدم: {question}")
+        # نستخدم await هنا
+        response = model.generate_content(prompt)
         return response.text
     except Exception as e:
         logger.error(f"Gemini error: {e}")
