@@ -178,6 +178,25 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main(update, context)
         return
 
+    # اسم السورة يشتغل بصرف النظر عن الـ state
+    surah_match = next((x for x in SURAHS if f"{x['number']}. {x['name']}" == txt), None)
+    if surah_match:
+        page = context.user_data.get("ghazi_quran_page", 0)
+        context.user_data["ghazi_quran_page"] = page
+        text = (
+            f"📖 *سورة {surah_match['name']}*\n"
+            f"🔢 رقمها: *{surah_match['number']}* | "
+            f"📝 آياتها: *{surah_match['verses']}* آية | "
+            f"🕌 *{surah_match['type']}*\n\n"
+            f"اضغط الزر أدناه لقراءة السورة أو الاستماع:"
+        )
+        await update.effective_message.reply_text(
+            text,
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=ghazi_surah_keyboard(surah_match['number']),
+        )
+        return
+
     if s == "main":
         await route_main(update, context, txt)
     elif s == "quran":
