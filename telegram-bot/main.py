@@ -303,23 +303,17 @@ def ghazi_quran_keyboard(page=0):
     buttons.append(nav)
     return InlineKeyboardMarkup(buttons)
 
-def ghazi_surah_keyboard(surah_num, back_page):
+def ghazi_surah_keyboard(surah_num):
     url_read = f"https://6tx8ol-commits.github.io/charity-bot/ghazi/surah.html?s={surah_num}"
     buttons = [[InlineKeyboardButton("📖 اقرأ السورة", url=url_read)]]
     for name, base in GHAZI_RECITERS:
         audio_url = f"{base}{surah_num:03d}.mp3"
         buttons.append([InlineKeyboardButton(f"🎧 {name}", url=audio_url)])
-    buttons.append([InlineKeyboardButton("🔙 رجوع للسور", callback_data=f"gquran_p{back_page}")])
+    buttons.append([InlineKeyboardButton("🔙 رجوع للسور", callback_data="ghazi_back_surahs")])
     return InlineKeyboardMarkup(buttons)
 
 async def show_quran_menu(update, context):
-    set_state(context, "quran")
-    await update.effective_message.reply_text(
-        "📖 القرآن الكريم 🤍\n\n"
-        "﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾\n\n"
-        "اختر السورة:",
-        reply_markup=ghazi_quran_keyboard(0),
-    )
+    await show_surah_page(update, context, 0)
 
 async def handle_ghazi_quran_callback(update, context):
     query = update.callback_query
@@ -327,27 +321,9 @@ async def handle_ghazi_quran_callback(update, context):
     data = query.data
     if data == "noop":
         return
-    if data.startswith("gquran_p"):
-        page = int(data.replace("gquran_p", ""))
-        await query.message.edit_reply_markup(reply_markup=ghazi_quran_keyboard(page))
-    elif data.startswith("gsurah_"):
-        parts = data.split("_")
-        surah_num  = int(parts[1])
-        back_page  = int(parts[2])
-        surah = next((s for s in SURAHS if s["number"] == surah_num), None)
-        if surah:
-            text = (
-                f"📖 *سورة {surah['name']}*\n"
-                f"🔢 رقمها: *{surah['number']}* | "
-                f"📝 آياتها: *{surah['verses']}* | "
-                f"🕌 *{surah['type']}*\n\n"
-                f"اختر القراءة أو الاستماع:"
-            )
-            await query.message.reply_text(
-                text,
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=ghazi_surah_keyboard(surah_num, back_page),
-            )
+    if data == "ghazi_back_surahs":
+        page = context.user_data.get("ghazi_quran_page", 0)
+        await show_surah_page(update, context, page)
 
 async def route_quran(update, context, txt):
     if txt == "📚 قائمة السور الـ 114":
@@ -393,29 +369,19 @@ async def route_surah_page(update, context, txt, s):
     else:
         surah = next((x for x in SURAHS if f"{x['number']}. {x['name']}" == txt), None)
         if surah:
-            quran_url = f"https://6tx8ol-commits.github.io/charity-bot/ghazi/surah.html?s={surah['number']}"
-            inline_kb = InlineKeyboardMarkup([[
-                InlineKeyboardButton("📖 اقرأ السورة", url=quran_url)
-            ]])
+            context.user_data["ghazi_quran_page"] = page
             text = (
-                f"📖 *سورة {surah['name']}*\n\n"
-                f"🔢 رقمها: *{surah['number']}*\n"
-                f"📝 آياتها: *{surah['verses']}* آية\n"
-                f"🕌 نوعها: *{surah['type']}*\n\n"
-                f"🎧 *الاستماع:*\n"
-                f"• محمد أيوب: https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/{surah['number']:03d}.mp3\n"
-                f"• سعود الشريم: https://server7.mp3quran.net/shur/{surah['number']:03d}.mp3\n"
-                f"• عبدالولي الأركاني: https://server6.mp3quran.net/arkani/{surah['number']:03d}.mp3\n"
-                f"• علي جابر: https://server11.mp3quran.net/a_jbr/{surah['number']:03d}.mp3\n"
-                f"• عبدالرحمن السديس: https://server11.mp3quran.net/sds/{surah['number']:03d}.mp3\n"
-                f"• ماهر المعيقلي: https://server12.mp3quran.net/maher/{surah['number']:03d}.mp3"
+                f"📖 *سورة {surah['name']}*\n"
+                f"🔢 رقمها: *{surah['number']}* | "
+                f"📝 آياتها: *{surah['verses']}* آية | "
+                f"🕌 *{surah['type']}*\n\n"
+                f"اختر القراءة أو الاستماع:"
             )
             await update.effective_message.reply_text(
-                text + get_footer(),
+                text,
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=inline_kb,
+                reply_markup=ghazi_surah_keyboard(surah['number']),
             )
-            await update.effective_message.reply_text(DUA_GHAZI, reply_markup=kb([[BACK_MAIN]]))
         else:
             await show_surah_page(update, context, page)
 
@@ -1192,7 +1158,7 @@ def main():
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("menu",  cmd_start))
     app.add_handler(CommandHandler("users", cmd_users))
-    app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(gquran_p\d+|gsurah_\d+_\d+|noop)$"))
+    app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(ghazi_back_surahs|noop)$"))
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_msg
     ))
