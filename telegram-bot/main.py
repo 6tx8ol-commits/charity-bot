@@ -305,11 +305,10 @@ def ghazi_quran_keyboard(page=0):
 
 def ghazi_surah_keyboard(surah_num):
     url_read = f"https://helpful-cupcake-2e3954.netlify.app/surah.html?s={surah_num}"
-    buttons = [[InlineKeyboardButton("📖 اقرأ السورة", url=url_read)]]
-    for name, base in GHAZI_RECITERS:
-        audio_url = f"{base}{surah_num:03d}.mp3"
-        buttons.append([InlineKeyboardButton(f"🎧 {name}", url=audio_url)])
-    buttons.append([InlineKeyboardButton("🔙 رجوع للسور", callback_data="ghazi_back_surahs")])
+    buttons = [
+        [InlineKeyboardButton("📖 اقرأ السورة", url=url_read)],
+        [InlineKeyboardButton("🔙 رجوع للسور", callback_data="ghazi_back_surahs")],
+    ]
     return InlineKeyboardMarkup(buttons)
 
 async def show_quran_menu(update, context):
