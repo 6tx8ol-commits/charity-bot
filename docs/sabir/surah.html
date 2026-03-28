@@ -4,111 +4,270 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>القرآن الكريم</title>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Tajawal',sans-serif;background:#0a0a06;color:#ede8de;min-height:100vh}
+    :root {
+      --bg: #0b1a10;
+      --bg2: #0f2016;
+      --accent: #2e8b57;
+      --accent2: #3dae70;
+      --text: #e8f5ee;
+      --text2: #a8c8b5;
+      --text3: #6a9a7a;
+      --border: rgba(46,139,87,.22);
+      --border2: rgba(46,139,87,.1);
+      --card: rgba(46,139,87,.07);
+      --card2: rgba(46,139,87,.13);
+      --shadow: rgba(46,139,87,.18);
+      --ayah-bg: transparent;
+    }
+    [data-theme="light"] {
+      --bg: #f5f7f2;
+      --bg2: #edf0e8;
+      --accent: #2e7d50;
+      --accent2: #1a5c38;
+      --text: #1a2e22;
+      --text2: #3a5a45;
+      --text3: #6a8a72;
+      --border: rgba(46,125,80,.25);
+      --border2: rgba(46,125,80,.12);
+      --card: rgba(46,125,80,.07);
+      --card2: rgba(46,125,80,.13);
+      --shadow: rgba(46,125,80,.15);
+      --ayah-bg: #fff;
+    }
+    [data-theme="navy"] {
+      --bg: #08111e;
+      --bg2: #0d1a2e;
+      --accent: #4a7cc8;
+      --accent2: #6b9be0;
+      --text: #dce8f8;
+      --text2: #8aaace;
+      --text3: #4a6a90;
+      --border: rgba(74,124,200,.22);
+      --border2: rgba(74,124,200,.1);
+      --card: rgba(74,124,200,.07);
+      --card2: rgba(74,124,200,.13);
+      --shadow: rgba(74,124,200,.18);
+      --ayah-bg: transparent;
+    }
 
-    /* ═══ الخلفية الهندسية ═══ */
-    .geo-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;pointer-events:none}
-    .geo-bg svg{width:100%;height:100%;opacity:.04}
+    * { margin:0; padding:0; box-sizing:border-box }
+    html { scroll-behavior:smooth }
+    body {
+      font-family:'Tajawal',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      transition: background .3s, color .3s;
+    }
 
-    /* ═══ الهيدر ═══ */
-    header{position:relative;z-index:2;text-align:center;padding:0 20px 0}
-    .header-inner{background:linear-gradient(180deg,#1c1408 0%,transparent 100%);padding:30px 20px 25px;border-bottom:1px solid rgba(212,175,55,.2)}
-    .back-btn{display:inline-flex;align-items:center;gap:6px;color:#d4af37;text-decoration:none;font-size:.9rem;opacity:.8;margin-bottom:18px;transition:.2s}
-    .back-btn:hover{opacity:1}
-    .surah-badge{display:inline-block;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:#d4af37;font-size:.75rem;padding:3px 12px;border-radius:20px;margin-bottom:10px;letter-spacing:1px}
-    h1{font-family:'Amiri',serif;font-size:2.2rem;color:#d4af37;margin-bottom:4px;text-shadow:0 0 40px rgba(212,175,55,.3)}
-    .meta{font-size:.82rem;color:#8a7a60;margin-bottom:0}
+    .theme-bar {
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      padding:14px 20px 10px;
+      position:sticky;
+      top:0;
+      z-index:100;
+      background:var(--bg);
+      border-bottom:1px solid var(--border2);
+    }
+    .theme-btn {
+      width:30px; height:30px;
+      border-radius:50%;
+      border:2px solid transparent;
+      cursor:pointer;
+      transition:.2s;
+    }
+    .theme-btn.active { border-color:var(--accent); transform:scale(1.15); }
+    .t-green { background: radial-gradient(circle at 40% 40%, #3dae70, #0b1a10); }
+    .t-light { background: radial-gradient(circle at 40% 40%, #ffffff, #e8ede5); border-color:#ccc !important; }
+    .t-navy  { background: radial-gradient(circle at 40% 40%, #4a7cc8, #08111e); }
 
-    /* ═══ البسملة ═══ */
-    .bismillah-wrap{text-align:center;padding:30px 20px 10px;position:relative;z-index:2}
-    .bismillah{font-family:'Amiri Quran','Amiri',serif;font-size:1.9rem;color:#d4af37;opacity:.95;line-height:1.8}
-    .bismillah-line{width:60px;height:1px;background:rgba(212,175,55,.3);margin:12px auto 0}
+    header {
+      text-align:center;
+      padding:32px 20px 24px;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, var(--bg2) 0%, transparent 100%);
+    }
+    .back-btn {
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      color:var(--text3);
+      text-decoration:none;
+      font-size:.85rem;
+      margin-bottom:16px;
+      transition:.2s;
+    }
+    .back-btn:hover { color:var(--accent); }
+    .surah-badge {
+      display:inline-block;
+      background:var(--card2);
+      border:1px solid var(--border);
+      color:var(--accent2);
+      font-size:.72rem;
+      padding:3px 14px;
+      border-radius:20px;
+      margin-bottom:12px;
+      letter-spacing:1px;
+    }
+    h1 {
+      font-family:'Amiri',serif;
+      font-size:2.6rem;
+      color:var(--accent2);
+      margin-bottom:6px;
+      text-shadow:0 0 50px var(--shadow);
+    }
+    .meta { font-size:.8rem; color:var(--text3); }
 
-    /* ═══ القرّاء ═══ */
-    .reciters-section{max-width:720px;margin:24px auto 0;padding:0 16px;position:relative;z-index:2}
-    .reciters-title{text-align:center;font-size:.78rem;color:#7a6a50;letter-spacing:2px;margin-bottom:12px;text-transform:uppercase}
-    .reciters-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    @media(max-width:500px){.reciters-grid{grid-template-columns:repeat(2,1fr)}}
-    .reciter-btn{background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.15);border-radius:10px;padding:10px 8px;cursor:pointer;transition:.2s;text-align:center;color:#c9a84c;font-size:.78rem;font-family:'Tajawal',sans-serif;line-height:1.3}
-    .reciter-btn:hover{background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.35)}
-    .reciter-btn.active{background:rgba(212,175,55,.18);border-color:rgba(212,175,55,.6);color:#d4af37;box-shadow:0 0 12px rgba(212,175,55,.15)}
-    .reciter-btn .icon{font-size:1.1rem;display:block;margin-bottom:3px}
+    .bismillah-wrap { text-align:center; padding:36px 20px 20px; display:none; }
+    .bismillah {
+      font-family:'Amiri Quran','Amiri',serif;
+      font-size:2.1rem;
+      color:var(--accent);
+      line-height:2;
+      opacity:.9;
+    }
+    .bismillah-line { width:50px; height:1px; background:var(--border); margin:14px auto 0; }
 
-    /* ═══ مشغّل الصوت ═══ */
-    .player-wrap{max-width:720px;margin:14px auto 0;padding:0 16px;position:relative;z-index:2}
-    .player-box{background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.18);border-radius:14px;padding:16px 20px;display:none}
-    .player-box.show{display:block}
-    .player-label{font-size:.8rem;color:#8a7a60;margin-bottom:8px;text-align:center}
-    audio{width:100%;height:40px;border-radius:8px;outline:none}
-    audio::-webkit-media-controls-panel{background:#1a1408}
+    .section { max-width:700px; margin:0 auto; padding:0 16px; }
+    .section-title {
+      text-align:center;
+      font-size:.72rem;
+      color:var(--text3);
+      letter-spacing:2.5px;
+      margin:28px 0 14px;
+    }
+    .reciters-grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+    }
+    @media(max-width:480px){.reciters-grid{grid-template-columns:repeat(2,1fr)}}
+    .reciter-btn {
+      background:var(--card);
+      border:1px solid var(--border2);
+      border-radius:12px;
+      padding:12px 8px;
+      cursor:pointer;
+      transition:.25s;
+      text-align:center;
+      color:var(--text2);
+      font-size:.78rem;
+      font-family:'Tajawal',sans-serif;
+      line-height:1.4;
+    }
+    .reciter-btn:hover { background:var(--card2); border-color:var(--border); color:var(--text); }
+    .reciter-btn.active {
+      background:var(--card2);
+      border-color:var(--accent);
+      color:var(--accent2);
+      box-shadow:0 0 16px var(--shadow);
+    }
+    .reciter-btn .icon { font-size:1.2rem; display:block; margin-bottom:4px; }
 
-    /* ═══ الآيات ═══ */
-    .ayahs-wrap{max-width:720px;margin:28px auto 0;padding:0 16px 80px;position:relative;z-index:2}
-    .ayah{font-family:'Amiri Quran','Amiri',serif;font-size:1.55rem;line-height:2.6;color:#ede8de;padding:16px 0;border-bottom:1px solid rgba(212,175,55,.06);word-spacing:3px}
-    .ayah-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.25);color:#c9a84c;font-size:.72rem;font-family:'Tajawal',sans-serif;margin-right:6px;vertical-align:middle;flex-shrink:0}
+    .player-box {
+      background:var(--card2);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px 20px;
+      margin-top:12px;
+      display:none;
+      animation:fadeIn .3s;
+    }
+    .player-box.show { display:block; }
+    .player-label { font-size:.78rem; color:var(--text3); margin-bottom:10px; text-align:center; }
+    audio { width:100%; height:42px; border-radius:10px; outline:none; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
 
-    .loading{text-align:center;padding:70px 20px;color:#5a4a30;font-size:1rem;position:relative;z-index:2}
-    .spinner{width:40px;height:40px;border:3px solid rgba(212,175,55,.1);border-top-color:#d4af37;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    .ayahs-wrap {
+      max-width:700px;
+      margin:32px auto 0;
+      padding:0 16px 100px;
+    }
+    .ayah {
+      font-family:'Amiri Quran','Amiri',serif;
+      font-size:1.65rem;
+      line-height:2.8;
+      color:var(--text);
+      padding:20px 16px;
+      border-bottom:1px solid var(--border2);
+      border-radius:8px;
+      background:var(--ayah-bg);
+      margin-bottom:4px;
+      word-spacing:4px;
+      transition: background .2s;
+    }
+    [data-theme="light"] .ayah { border:1px solid var(--border2); margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+    .ayah:hover { background:var(--card); }
+    .ayah-num {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:28px; height:28px;
+      border-radius:50%;
+      background:var(--card2);
+      border:1px solid var(--border);
+      color:var(--accent);
+      font-size:.68rem;
+      font-family:'Tajawal',sans-serif;
+      margin-right:4px;
+      vertical-align:middle;
+    }
 
-    footer{text-align:center;padding:30px 20px;color:#3a2a10;font-size:.8rem;border-top:1px solid rgba(212,175,55,.07);position:relative;z-index:2}
-    .dua{color:#6a5a40;font-size:.85rem;line-height:2}
+    .loading { text-align:center; padding:80px 20px; color:var(--text3); }
+    .spinner {
+      width:44px; height:44px;
+      border:3px solid var(--border2);
+      border-top-color:var(--accent);
+      border-radius:50%;
+      animation:spin .9s linear infinite;
+      margin:0 auto 16px;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    footer {
+      text-align:center;
+      padding:32px 20px;
+      color:var(--text3);
+      font-size:.82rem;
+      border-top:1px solid var(--border2);
+      line-height:2.2;
+    }
+    .dua { color:var(--text2); }
   </style>
 </head>
 <body>
 
-<!-- خلفية هندسية إسلامية -->
-<div class="geo-bg">
-  <svg viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <pattern id="geo" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-        <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke="#d4af37" stroke-width=".6"/>
-        <polygon points="50,18 82,35 82,65 50,82 18,65 18,35" fill="none" stroke="#d4af37" stroke-width=".4"/>
-        <line x1="50" y1="5" x2="50" y2="18" stroke="#d4af37" stroke-width=".3"/>
-        <line x1="95" y1="27.5" x2="82" y2="35" stroke="#d4af37" stroke-width=".3"/>
-        <line x1="95" y1="72.5" x2="82" y2="65" stroke="#d4af37" stroke-width=".3"/>
-        <line x1="50" y1="95" x2="50" y2="82" stroke="#d4af37" stroke-width=".3"/>
-        <line x1="5" y1="72.5" x2="18" y2="65" stroke="#d4af37" stroke-width=".3"/>
-        <line x1="5" y1="27.5" x2="18" y2="35" stroke="#d4af37" stroke-width=".3"/>
-        <circle cx="50" cy="50" r="3" fill="none" stroke="#d4af37" stroke-width=".4"/>
-      </pattern>
-    </defs>
-    <rect width="800" height="800" fill="url(#geo)"/>
-  </svg>
+<div class="theme-bar">
+  <button class="theme-btn t-green active" title="أخضر" onclick="setTheme('green',this)"></button>
+  <button class="theme-btn t-light" title="فاتح" onclick="setTheme('light',this)"></button>
+  <button class="theme-btn t-navy"  title="كحلي" onclick="setTheme('navy',this)"></button>
 </div>
 
 <header>
-  <div class="header-inner">
-    <a class="back-btn" href="./">← قائمة السور</a>
-    <div class="surah-badge" id="surah-badge">سورة •••</div>
-    <h1 id="surah-name">...</h1>
-    <div class="meta" id="surah-meta"></div>
-  </div>
+  <a class="back-btn" href="./">← قائمة السور</a>
+  <div class="surah-badge" id="surah-badge">سورة •••</div>
+  <h1 id="surah-name">...</h1>
+  <div class="meta" id="surah-meta"></div>
 </header>
 
-<div id="bismillah-wrap" class="bismillah-wrap" style="display:none">
+<div id="bismillah-wrap" class="bismillah-wrap">
   <div class="bismillah">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
   <div class="bismillah-line"></div>
 </div>
 
-<!-- القرّاء -->
-<div class="reciters-section">
-  <div class="reciters-title">🎧 اختر القارئ للاستماع</div>
+<div class="section">
+  <div class="section-title">🎧 اختر القارئ للاستماع</div>
   <div class="reciters-grid" id="reciters-grid"></div>
-</div>
-
-<!-- مشغّل الصوت -->
-<div class="player-wrap">
   <div class="player-box" id="player-box">
     <div class="player-label" id="player-label"></div>
     <audio id="audio-player" controls preload="none"></audio>
   </div>
 </div>
 
-<!-- الآيات -->
 <div class="ayahs-wrap" id="ayahs">
   <div class="loading">
     <div class="spinner"></div>
@@ -117,35 +276,55 @@
 </div>
 
 <footer>
-  <div class="dua">اللهم اجعل هذا القرآن صدقة جارية عن روح محمد صابر روزي وعائشة ملا<br>وارحمهما واجمعنا بهم في جنات النعيم 🤍</div>
+  <div class="dua">
+    اللهم اجعل هذا القرآن صدقةً جاريةً عن محمد صابر روزي وعائشة ملا<br>
+    واجعلنا وإياهم من أهل القرآن 🤍
+  </div>
 </footer>
 
 <script>
+const THEMES = { green: '', light: 'light', navy: 'navy' };
+function setTheme(name, btn) {
+  document.documentElement.setAttribute('data-theme', THEMES[name]);
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  localStorage.setItem('qtheme', name);
+}
+(function(){
+  const t = localStorage.getItem('qtheme') || 'green';
+  if (t !== 'green') {
+    document.documentElement.setAttribute('data-theme', THEMES[t]);
+    document.querySelectorAll('.theme-btn').forEach(b => {
+      if (b.classList.contains('t-'+t)) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  }
+})();
+
 const RECITERS = [
-  {name:"محمد أيوب",     base:"https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/"},
-  {name:"سعود الشريم",   base:"https://server7.mp3quran.net/shur/"},
+  {name:"محمد أيوب",         base:"https://server16.mp3quran.net/ayyoub2/Rewayat-Hafs-A-n-Assem/"},
+  {name:"سعود الشريم",       base:"https://server7.mp3quran.net/shur/"},
   {name:"عبدالولي الأركاني", base:"https://server6.mp3quran.net/arkani/"},
-  {name:"علي جابر",      base:"https://server11.mp3quran.net/a_jbr/"},
-  {name:"عبدالرحمن السديس", base:"https://server11.mp3quran.net/sds/"},
-  {name:"ماهر المعيقلي", base:"https://server12.mp3quran.net/maher/"},
+  {name:"علي جابر",          base:"https://server11.mp3quran.net/a_jbr/"},
+  {name:"عبدالرحمن السديس",  base:"https://server11.mp3quran.net/sds/"},
+  {name:"ماهر المعيقلي",     base:"https://server12.mp3quran.net/maher/"},
 ];
 
 const params = new URLSearchParams(window.location.search);
-const num = Math.min(Math.max(parseInt(params.get('s'))||1, 1), 114);
+const num = Math.min(Math.max(parseInt(params.get('s'))||1,1),114);
 const names = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
 document.title = `سورة ${names[num-1]} — القرآن الكريم`;
 document.getElementById('surah-name').textContent = names[num-1];
 document.getElementById('surah-badge').textContent = `سورة ${num}`;
 
-// القرّاء
 const grid = document.getElementById('reciters-grid');
 const audio = document.getElementById('audio-player');
 const playerBox = document.getElementById('player-box');
 const playerLabel = document.getElementById('player-label');
 let activeBtn = null;
 
-RECITERS.forEach((r, i) => {
+RECITERS.forEach(r => {
   const btn = document.createElement('button');
   btn.className = 'reciter-btn';
   btn.innerHTML = `<span class="icon">🎤</span>${r.name}`;
@@ -153,8 +332,7 @@ RECITERS.forEach((r, i) => {
     if (activeBtn) activeBtn.classList.remove('active');
     btn.classList.add('active');
     activeBtn = btn;
-    const url = `${r.base}${String(num).padStart(3,'0')}.mp3`;
-    audio.src = url;
+    audio.src = `${r.base}${String(num).padStart(3,'0')}.mp3`;
     playerLabel.textContent = `🎧 ${r.name} — سورة ${names[num-1]}`;
     playerBox.classList.add('show');
     audio.play();
@@ -162,12 +340,12 @@ RECITERS.forEach((r, i) => {
   grid.appendChild(btn);
 });
 
-// الآيات
 fetch(`https://api.alquran.cloud/v1/surah/${num}`)
   .then(r => r.json())
   .then(data => {
     const surah = data.data;
-    document.getElementById('surah-meta').textContent = `${surah.numberOfAyahs} آية · ${surah.revelationType==='Meccan'?'مكية':'مدنية'}`;
+    document.getElementById('surah-meta').textContent =
+      `${surah.numberOfAyahs} آية · ${surah.revelationType==='Meccan'?'مكية':'مدنية'}`;
     if (num !== 9) document.getElementById('bismillah-wrap').style.display = 'block';
     const container = document.getElementById('ayahs');
     container.innerHTML = '';
@@ -175,13 +353,18 @@ fetch(`https://api.alquran.cloud/v1/surah/${num}`)
       const div = document.createElement('div');
       div.className = 'ayah';
       let text = ayah.text;
-      if (num !== 1) text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ','').replace('بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ ','');
+      if (num !== 1) {
+        text = text
+          .replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ','')
+          .replace('بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ ','');
+      }
       div.innerHTML = `${text} <span class="ayah-num">${ayah.numberInSurah}</span>`;
       container.appendChild(div);
     });
   })
   .catch(() => {
-    document.getElementById('ayahs').innerHTML = '<div style="text-align:center;padding:60px;color:#8a5a30">⚠️ تعذّر تحميل السورة — تحقق من الاتصال بالإنترنت</div>';
+    document.getElementById('ayahs').innerHTML =
+      '<div style="text-align:center;padding:60px;color:var(--text3)">⚠️ تعذّر تحميل السورة — تحقق من الاتصال</div>';
   });
 </script>
 </body>
