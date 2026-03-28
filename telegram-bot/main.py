@@ -299,7 +299,7 @@ async def route_surah_page(update, context, txt, s):
                 f"📝 آياتها: *{surah['verses']}* آية\n"
                 f"🕌 نوعها: *{surah['type']}*\n\n"
                 f"🌐 اقرأها: https://quran.com/ar/{surah['number']}\n"
-                f"🎧 استمع: https://www.mp3quran.net/ar/Alafasy/{surah['number']:03d}.mp3",
+                f"🎧 استمع: https://server8.mp3quran.net/afs/{surah['number']:03d}.mp3",
                 kb([[BACK_MAIN]]),
             )
         else:
