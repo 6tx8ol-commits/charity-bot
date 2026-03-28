@@ -681,13 +681,13 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
             return
 
-    if len(msg) > 3:
-        user_id = update.message.from_user.id if update.message.from_user else None
-        answer = ask_islamic_question(msg, user_id=user_id)
+        if len(msg) > 3:
+        from gemini_ai import ask_gemini
+        answer = await ask_gemini(msg)
         if answer:
             await update.message.reply_text(answer)
             await update.message.reply_text(get_separator())
-            await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
+            await update.message.reply_text(footer_msg())
         else:
             await update.message.reply_text(
                 "لم اتمكن من الاجابة حاليا — حاول مرة اخرى 🤍",
