@@ -147,6 +147,7 @@ def main_keyboard():
             InlineKeyboardButton("🌺 آداب اسلامية", callback_data="adab"),
         ],
         [InlineKeyboardButton("🕐 اوقات الصلاة", callback_data="prayer_times")],
+        [InlineKeyboardButton("🌐 الموقع الرسمي", url="https://6tx8ol-commits.github.io/charity-bot/")],
         [InlineKeyboardButton("📢 قناة اثر", url="https://t.me/Athar_Atkar")],
         [
             InlineKeyboardButton("📸 انستقرام", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
