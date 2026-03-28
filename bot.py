@@ -3,7 +3,7 @@ import logging
 import datetime
 import unicodedata
 from zoneinfo import ZoneInfo
-from hijri_converter import Hijri, Gregorian
+from hijridate import Hijri, Gregorian
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ChatMemberHandler, filters, ContextTypes
 from telegram.error import TelegramError
@@ -22,6 +22,7 @@ from content import (
 )
 from islamic_qa import ask_islamic_question
 
+
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO
@@ -29,7 +30,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-
 _raw_channel = os.environ.get("TELEGRAM_CHANNEL_ID", "")
 if _raw_channel.startswith("https://t.me/"):
     CHANNEL_ID = "@" + _raw_channel.split("https://t.me/")[-1].strip("/")
