@@ -108,7 +108,7 @@ def main_keyboard():
         [InlineKeyboardButton("📢 قناة اثر", url="https://t.me/Athar_Atkar")],
         [
             InlineKeyboardButton("📸 انستقرام", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
-            InlineKeyboardButton("🎵 تيك توك", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4"),
+            InlineKeyboardButton("🎬 تيك توك", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4"),
         ],
     ])
 
