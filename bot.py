@@ -831,6 +831,10 @@ def build_application() -> Application:
 
     logger.info("Application built with all handlers and scheduled jobs.")
     return app
+  
+    
+    
+    
     if __name__ == "__main__":
     import asyncio
     application = build_application()
