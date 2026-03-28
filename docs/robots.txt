@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://6tx8ol-commits.github.io/charity-bot/sitemap.xml
