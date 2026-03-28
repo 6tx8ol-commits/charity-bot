@@ -223,6 +223,9 @@ def prophets_keyboard_page1():
             InlineKeyboardButton("شعيب", callback_data="prophet_shuaib"),
         ],
         [
+            InlineKeyboardButton("أيوب", callback_data="prophet_ayyub"),
+        ],
+        [
             InlineKeyboardButton("التالي ←", callback_data="prophets_page2"),
             InlineKeyboardButton("رجوع للقائمة", callback_data="menu"),
         ],
