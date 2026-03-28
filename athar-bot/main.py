@@ -294,7 +294,7 @@ def quran_keyboard(page=0):
         for j in range(i, min(i + 3, end)):
             surah_num = j + 1
             name = QURAN_SURAHS[j]
-            url = f"https://legendary-yeot-b80ee7.netlify.app/surah.html?s={surah_num}"
+            url = f"https://6tx8ol-commits.github.io/charity-bot/sabir/surah.html?s={surah_num}"
             row.append(InlineKeyboardButton(f"{surah_num}. {name}", url=url))
         buttons.append(row)
     nav = []
