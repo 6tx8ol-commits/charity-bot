@@ -30,6 +30,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+
 _raw_channel = os.environ.get("TELEGRAM_CHANNEL_ID", "")
 if _raw_channel.startswith("https://t.me/"):
     CHANNEL_ID = "@" + _raw_channel.split("https://t.me/")[-1].strip("/")
