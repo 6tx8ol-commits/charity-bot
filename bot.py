@@ -683,7 +683,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if len(msg) > 3:
         user_id = update.message.from_user.id if update.message.from_user else None
-        answer = ask_islamic_question(msg, user_id=user_id)
+        answer = await ask_islamic_question(msg, user_id=user_id)
         if answer:
             await update.message.reply_text(answer)
             await update.message.reply_text(get_separator())
