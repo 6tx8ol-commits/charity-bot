@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import datetime
+import asyncio
 import unicodedata
 from zoneinfo import ZoneInfo
 from hijridate import Hijri, Gregorian
@@ -71,6 +72,44 @@ async def cmd_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines))
 
 TOKEN = os.environ.get("BOT_TOKEN")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
+GEMINI_SYSTEM_PROMPT = """أنت مساعد إسلامي متخصص في الإجابة على الأسئلة الدينية والشرعية.
+
+قواعدك:
+- أجب بالعربية الواضحة والمفهومة
+- استند إلى القرآن الكريم والسنة النبوية الصحيحة فقط
+- اذكر المصادر: (اسم السورة ورقم الآية) أو (اسم الحديث وراويه ودرجته)
+- كن موجزاً ومفيداً وابتعد عن الحشو
+- في المسائل الفقهية الدقيقة أو الفتاوى الشخصية: انصح بمراجعة عالم متخصص
+- لا تتكلم في موضوعات خارج الإسلام والدين"""
+
+
+async def ask_gemini(question: str) -> str | None:
+    if not GEMINI_API_KEY:
+        return None
+
+    def _call():
+        import requests as _req
+        resp = _req.post(
+            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
+            json={
+                "system_instruction": {"parts": [{"text": GEMINI_SYSTEM_PROMPT}]},
+                "contents": [{"parts": [{"text": question}]}],
+                "generationConfig": {"maxOutputTokens": 600, "temperature": 0.3},
+            },
+            timeout=20,
+        )
+        data = resp.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"]
+
+    try:
+        return await asyncio.to_thread(_call)
+    except Exception as e:
+        logger.warning(f"Gemini error: {e}")
+        return None
+
 
 _raw_channel = os.environ.get("TELEGRAM_CHANNEL_ID", "")
 if _raw_channel.startswith("https://t.me/"):
@@ -836,6 +875,17 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
             return
 
+    if GEMINI_API_KEY and len(msg.strip()) >= 5:
+        await update.message.reply_chat_action("typing")
+        answer = await ask_gemini(msg)
+        if answer:
+            await update.message.reply_text(
+                f"🤖 *جواب الذكاء الاصطناعي:*\n\n{answer}\n\n"
+                "━━━━━━━━━━━━━━\n"
+                "⚠️ _للأمور الفقهية الشخصية، راجع عالماً متخصصاً_",
+                parse_mode="Markdown",
+            )
+            return
 
 
 async def _delete_msgs(context: ContextTypes.DEFAULT_TYPE, chat_id, msg_id1, msg_id2):
