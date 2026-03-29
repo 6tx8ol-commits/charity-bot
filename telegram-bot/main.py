@@ -102,7 +102,7 @@ def get_footer() -> str:
 
 # ─── دعاء يُرسل مع كل رسالة ────────────────────────────
 DUA_GHAZI = (
-    "🤍 اللهم اجعل هذا العمل صدقة جارية في ميزان حسنات الأستاذ غازي عجاج، "
+    "🤍 اللهم اجعل هذا العمل صدقة جارية في ميزان حسنات السيد غازي عجاج، "
     "ونوراً له في قبره لا ينطفئ.. نسألكم الدعاء له بالرحمة والمغفرة، "
     "وأن يسكنه الله فسيح جناته."
 )
@@ -155,7 +155,7 @@ def main_inline_menu_ghazi():
         [InlineKeyboardButton("🌺 آداب اسلامية", callback_data="gmenu_adab"),
          InlineKeyboardButton("🙏 الاستغفار", callback_data="gmenu_istighfar")],
         [InlineKeyboardButton("🕐 اوقات الصلاة", callback_data="gmenu_prayer")],
-        [InlineKeyboardButton("🎙️ صوتيه تكبيرات للاستاذ غازي", callback_data="gmenu_takbeer")],
+        [InlineKeyboardButton("🎙️ صوتيه تكبيرات للسيد غازي", callback_data="gmenu_takbeer")],
     ])
 
 # ─── WELCOME ───────────────────────────────────────────
@@ -163,7 +163,7 @@ def main_inline_menu_ghazi():
 WELCOME = (
     "🌙 *أهلاً بك في بوت الأذكار* 🌙\n\n"
     "🤍 *اللهم اجعل هذا البوت صدقة جارية في ميزان حسنات*\n"
-    "*الأستاذ غازي عجاج رحمه الله،*\n"
+    "*السيد غازي عجاج رحمه الله،*\n"
     "*ونوراً له لا ينطفئ، وارفع درجاته في الفردوس الأعلى* 🤍\n\n"
     "اختر ما تريد من الأزرار بالأسفل ♡"
 )
@@ -311,7 +311,7 @@ async def route_main(update, context, txt):
         await show_istighfar_menu(update, context)
     elif txt == "🕐 اوقات الصلاة":
         await show_prayer_countries(update, context)
-    elif txt == "🎙️ صوتيه تكبيرات للاستاذ غازي عجاج":
+    elif txt == "🎙️ صوتيه تكبيرات للسيد غازي عجاج":
         await send_ghazi_audio(update, context)
     elif txt == "🔔 تفعيل التنبيه":
         await enable_prayer_notify(update, context)
@@ -1187,7 +1187,7 @@ _AUDIO_FILE_ID = None
 async def send_ghazi_audio(update, context):
     global _AUDIO_FILE_ID
     caption = (
-        "🎙️ *صوتيه تكبيرات للاستاذ غازي عجاج رحمه الله*\n\n"
+        "🎙️ *صوتيه تكبيرات للسيد غازي عجاج رحمه الله*\n\n"
         "🤍 اللهم كما أحييت ذكره بهذه التكبيرات، ارفع درجته في الجنة، "
         "واجعل نوره يضيء مرقده ولا ينطفئ."
     )
