@@ -574,7 +574,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
     if data == "menu":
-        await query.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
+        await query.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
         return
     elif data == "azkar_daily":
         await query.message.reply_text("الاذكار اليومية 🤍\n\nاختر:", reply_markup=azkar_daily_keyboard())
@@ -700,7 +700,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text(get_separator())
         await query.message.reply_text(footer_msg(), reply_markup=back_keyboard())
     else:
-        await query.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
+        await query.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
 
 
 def _strip(text):
@@ -770,7 +770,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if msg in ("اثر", "أثر", "القائمة", "المساعدة", "🔙 القائمة الرئيسية", "📋 القائمة"):
-        await update.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
+        await update.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
         return
 
     # ══ أزرار القائمة الرئيسية ══
