@@ -228,7 +228,7 @@ async def show_main(update, context, text=None):
     full = (text or WELCOME) + get_footer()
     await update.effective_message.reply_text(full, parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KB)
     await update.effective_message.reply_text(DUA_GHAZI)
-    await update.effective_message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu_ghazi())
+    await update.effective_message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode=ParseMode.MARKDOWN, reply_markup=main_inline_menu_ghazi())
 
 # ─── START ─────────────────────────────────────────────
 
