@@ -236,6 +236,17 @@ async def cmd_start(update, context):
     save_user(update.effective_user)
     await show_main(update, context)
 
+async def cmd_testai(update, context):
+    if not GEMINI_API_KEY:
+        await update.message.reply_text("❌ GEMINI_API_KEY غير موجود في المتغيرات. تحقق من Render.")
+        return
+    await update.message.reply_chat_action("typing")
+    answer = await ask_gemini("ما هي أركان الإسلام الخمسة؟")
+    if answer:
+        await update.message.reply_text(f"✅ الذكاء الاصطناعي يعمل:\n\n{answer[:300]}...")
+    else:
+        await update.message.reply_text("❌ المفتاح موجود لكن الطلب فشل. تحقق من صحة المفتاح.")
+
 # ─── MESSAGE ROUTER ─────────────────────────────────────
 
 async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -384,6 +395,23 @@ async def route_main(update, context, txt):
         await show_random_aya(update, context)
     elif txt == "🔄 حديث آخر":
         await show_hadith(update, context)
+    else:
+        if GEMINI_API_KEY and len(txt.strip()) >= 5:
+            await update.effective_message.reply_chat_action("typing")
+            answer = await ask_gemini(txt)
+            if answer:
+                await update.effective_message.reply_text(
+                    f"🤖 *جواب الذكاء الاصطناعي:*\n\n{answer}\n\n"
+                    "━━━━━━━━━━━━━━\n"
+                    "⚠️ _للأمور الفقهية الشخصية، راجع عالماً متخصصاً_",
+                    parse_mode=ParseMode.MARKDOWN,
+                )
+                return
+        await update.effective_message.reply_text(
+            "📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍",
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=main_inline_menu_ghazi(),
+        )
 
 # ═══════════════════════════════════════════════════════
 #  QURAN
@@ -1316,9 +1344,10 @@ def main():
     threading.Thread(target=_self_ping_loop,     daemon=True).start()
 
     app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", cmd_start))
-    app.add_handler(CommandHandler("menu",  cmd_start))
-    app.add_handler(CommandHandler("users", cmd_users))
+    app.add_handler(CommandHandler("start",  cmd_start))
+    app.add_handler(CommandHandler("menu",   cmd_start))
+    app.add_handler(CommandHandler("users",  cmd_users))
+    app.add_handler(CommandHandler("testai", cmd_testai))
     app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(ghazi_back_surahs|noop)$"))
     app.add_handler(CallbackQueryHandler(handle_ghazi_menu_callback, pattern=r"^gmenu_"))
     app.add_handler(MessageHandler(
