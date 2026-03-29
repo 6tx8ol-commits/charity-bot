@@ -4,7 +4,7 @@ import logging
 import datetime
 import asyncio
 import unicodedata
-import aiohttp
+
 from zoneinfo import ZoneInfo
 from hijridate import Hijri, Gregorian
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
@@ -73,47 +73,6 @@ async def cmd_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines))
 
 TOKEN = os.environ.get("BOT_TOKEN")
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-OPENROUTER_MODEL = "google/gemma-3-4b-it:free"
-
-_AI_SHORT_PROMPT = "أنت مساعد إسلامي. أجب في ٢-٣ جمل فقط بالعربية، ركّز على جوهر الجواب فقط باختصار."
-_AI_FULL_PROMPT  = """أنت مساعد إسلامي متخصص. أجب بالعربية بشكل مفصّل وشامل.
-- استند للقرآن والسنة واذكر المصادر
-- للفتاوى الشخصية: انصح بمراجعة عالم
-- لا تتكلم في أمور غير دينية"""
-
-_FULL_ANSWER_TRIGGERS = {"الجواب كامل", "جواب كامل", "الكامل", "كامل"}
-
-
-async def ask_gemini(question: str, full: bool = False) -> str | None:
-    if not OPENROUTER_API_KEY:
-        return None
-    prompt     = _AI_FULL_PROMPT  if full else _AI_SHORT_PROMPT
-    max_tokens = 500              if full else 110
-    timeout    = 30               if full else 12
-    payload = {
-        "model": OPENROUTER_MODEL,
-        "messages": [
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": question},
-        ],
-        "max_tokens": max_tokens,
-        "temperature": 0.3,
-    }
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                OPENROUTER_URL,
-                json=payload,
-                headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-                timeout=aiohttp.ClientTimeout(total=timeout),
-            ) as resp:
-                data = await resp.json()
-                return data["choices"][0]["message"]["content"]
-    except Exception as e:
-        logger.warning(f"OpenRouter error: {e}")
-        return None
 
 
 _raw_channel = os.environ.get("TELEGRAM_CHANNEL_ID", "")
@@ -538,56 +497,15 @@ async def job_daily_quiz(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    key = "✅ موجود" if OPENROUTER_API_KEY else "❌ غير موجود"
-    await update.message.reply_text(f"🏓 البوت يعمل!\nOPENROUTER_API_KEY: {key}")
+    await update.message.reply_text("🏓 البوت يعمل!")
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user(update.effective_user)
-    combined = (
-        WELCOME_TEXT
-        + "\n\n━━━━━━━━━━━━━━\n"
-        "📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍"
-    )
+    combined = WELCOME_TEXT + "\n\n━━━━━━━━━━━━━━\n📋 *اختر ما تريد:*"
     await update.message.reply_text(combined, parse_mode="Markdown", reply_markup=main_inline_menu())
 
 async def cmd_athar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
-
-async def cmd_testai(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    key_set = bool(OPENROUTER_API_KEY)
-    key_preview = f"{OPENROUTER_API_KEY[:8]}..." if key_set else "---"
-    if not key_set:
-        await update.message.reply_text("❌ OPENROUTER_API_KEY غير موجود في Render.")
-        return
-    await update.message.reply_chat_action("typing")
-    payload = {
-        "model": OPENROUTER_MODEL,
-        "messages": [
-            {"role": "system", "content": "أنت مساعد إسلامي"},
-            {"role": "user", "content": "ما هي أركان الإسلام الخمسة؟"},
-        ],
-        "max_tokens": 200,
-    }
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                OPENROUTER_URL,
-                json=payload,
-                headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-                timeout=aiohttp.ClientTimeout(total=30),
-            ) as resp:
-                data = await resp.json()
-                if "choices" in data:
-                    text = data["choices"][0]["message"]["content"]
-                    await update.message.reply_text(f"✅ الذكاء الاصطناعي يعمل:\n\n{text[:300]}")
-                else:
-                    err = data.get("error", {})
-                    await update.message.reply_text(
-                        f"❌ خطأ:\nكود: {err.get('code')}\n{err.get('message','؟')}\n"
-                        f"المفتاح يبدأ بـ: {key_preview}"
-                    )
-    except Exception as e:
-        await update.message.reply_text(f"❌ استثناء: {e}")
+    await update.message.reply_text("📋 *اختر ما تريد:*", parse_mode="Markdown", reply_markup=main_inline_menu())
 
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -609,7 +527,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
     if data == "menu":
-        await query.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
+        await query.message.reply_text("📋 *اختر ما تريد:*", parse_mode="Markdown", reply_markup=main_inline_menu())
         return
     elif data == "azkar_daily":
         await query.message.reply_text("الاذكار اليومية 🤍\n\nاختر:", reply_markup=azkar_daily_keyboard())
@@ -735,7 +653,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text(get_separator())
         await query.message.reply_text(footer_msg(), reply_markup=back_keyboard())
     else:
-        await query.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
+        await query.message.reply_text("📋 *اختر ما تريد:*", parse_mode="Markdown", reply_markup=main_inline_menu())
 
 
 def _strip(text):
@@ -757,22 +675,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     msg = update.message.text.strip()
     clean = _strip(msg)
-
-    if msg in _FULL_ANSWER_TRIGGERS:
-        last_q = context.user_data.get("last_ai_q")
-        if last_q and OPENROUTER_API_KEY:
-            await update.message.reply_chat_action("typing")
-            full_ans = await ask_gemini(last_q, full=True)
-            if full_ans:
-                await update.message.reply_text(
-                    f"🤖 *الجواب الكامل:*\n\n{full_ans}\n\n"
-                    "━━━━━━━━━━━━━━\n"
-                    "⚠️ _للأمور الفقهية الشخصية، راجع عالماً متخصصاً_",
-                    parse_mode="Markdown",
-                )
-                return
-        await update.message.reply_text("لا يوجد سؤال سابق، اكتب سؤالك أولاً 🤍")
-        return
 
     links_in_msg = msg.strip().split()
     tiktok_links = [l for l in links_in_msg if "tiktok.com" in l]
@@ -821,7 +723,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if msg in ("اثر", "أثر", "القائمة", "المساعدة", "🔙 القائمة الرئيسية", "📋 القائمة"):
-        await update.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
+        await update.message.reply_text("📋 *اختر ما تريد:*", parse_mode="Markdown", reply_markup=main_inline_menu())
         return
 
     # ══ أزرار القائمة الرئيسية ══
@@ -954,23 +856,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
             return
 
-    if OPENROUTER_API_KEY and len(msg.strip()) >= 5:
-        wait_msg = await update.message.reply_text("⏳ جاري التفكير...")
-        answer = await ask_gemini(msg, full=False)
-        await wait_msg.delete()
-        if answer:
-            context.user_data["last_ai_q"] = msg
-            await update.message.reply_text(
-                f"🤖 *جواب مختصر:*\n\n{answer}\n\n"
-                "━━━━━━━━━━━━━━\n"
-                "📝 _للجواب الكامل اكتب:_ *الجواب كامل*",
-                parse_mode="Markdown",
-            )
-            return
-        await update.message.reply_text(
-            "⚠️ لم أستطع الإجابة الآن، حاول مرة أخرى بعد لحظات 🙏"
-        )
-        return
 
 
 async def _delete_msgs(context: ContextTypes.DEFAULT_TYPE, chat_id, msg_id1, msg_id2):
@@ -1028,7 +913,7 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("athar",  cmd_athar))
     app.add_handler(CommandHandler("users",  cmd_users))
     app.add_handler(CommandHandler("ping",   cmd_ping))
-    app.add_handler(CommandHandler("testai", cmd_testai))
+
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(ChatMemberHandler(handle_new_member, ChatMemberHandler.CHAT_MEMBER))
