@@ -79,22 +79,28 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODEL = "google/gemma-3-4b-it:free"
 
-AI_SYSTEM_PROMPT = """أنت مساعد إسلامي. أجب بالعربية بشكل موجز ودقيق.
-- استند للقرآن والسنة واذكر المصدر باختصار
+_AI_SHORT_PROMPT = "أنت مساعد إسلامي. أجب في ٢-٣ جمل فقط بالعربية، ركّز على جوهر الجواب فقط باختصار."
+_AI_FULL_PROMPT  = """أنت مساعد إسلامي متخصص. أجب بالعربية بشكل مفصّل وشامل.
+- استند للقرآن والسنة واذكر المصادر
 - للفتاوى الشخصية: انصح بمراجعة عالم
 - لا تتكلم في أمور غير دينية"""
 
+_FULL_ANSWER_TRIGGERS = {"الجواب كامل", "جواب كامل", "الكامل", "كامل"}
 
-async def ask_gemini(question: str) -> str | None:
+
+async def ask_gemini(question: str, full: bool = False) -> str | None:
     if not OPENROUTER_API_KEY:
         return None
+    prompt     = _AI_FULL_PROMPT  if full else _AI_SHORT_PROMPT
+    max_tokens = 500              if full else 110
+    timeout    = 30               if full else 12
     payload = {
         "model": OPENROUTER_MODEL,
         "messages": [
-            {"role": "system", "content": AI_SYSTEM_PROMPT},
+            {"role": "system", "content": prompt},
             {"role": "user", "content": question},
         ],
-        "max_tokens": 200,
+        "max_tokens": max_tokens,
         "temperature": 0.3,
     }
     try:
@@ -103,7 +109,7 @@ async def ask_gemini(question: str) -> str | None:
                 OPENROUTER_URL,
                 json=payload,
                 headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-                timeout=aiohttp.ClientTimeout(total=12),
+                timeout=aiohttp.ClientTimeout(total=timeout),
             ) as resp:
                 data = await resp.json()
                 return data["choices"][0]["message"]["content"]
@@ -270,6 +276,22 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main(update, context)
         return
 
+    if txt in _FULL_ANSWER_TRIGGERS:
+        last_q = context.user_data.get("last_ai_q")
+        if last_q and OPENROUTER_API_KEY:
+            await update.effective_message.reply_chat_action("typing")
+            full_ans = await ask_gemini(last_q, full=True)
+            if full_ans:
+                await update.effective_message.reply_text(
+                    f"🤖 *الجواب الكامل:*\n\n{full_ans}\n\n"
+                    "━━━━━━━━━━━━━━\n"
+                    "⚠️ _للأمور الفقهية الشخصية، راجع عالماً متخصصاً_",
+                    parse_mode=ParseMode.MARKDOWN,
+                )
+                return
+        await update.effective_message.reply_text("لا يوجد سؤال سابق، اكتب سؤالك أولاً 🤍")
+        return
+
     # اسم السورة يشتغل بصرف النظر عن الـ state
     surah_match = next((x for x in SURAHS if f"{x['number']}. {x['name']}" == txt), None)
     if surah_match:
@@ -344,12 +366,13 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             if OPENROUTER_API_KEY and len(txt.strip()) >= 5:
                 await update.effective_message.reply_chat_action("typing")
-                answer = await ask_gemini(txt)
+                answer = await ask_gemini(txt, full=False)
                 if answer:
+                    context.user_data["last_ai_q"] = txt
                     await update.effective_message.reply_text(
-                        f"🤖 *جواب الذكاء الاصطناعي:*\n\n{answer}\n\n"
+                        f"🤖 *جواب مختصر:*\n\n{answer}\n\n"
                         "━━━━━━━━━━━━━━\n"
-                        "⚠️ _للأمور الفقهية الشخصية، راجع عالماً متخصصاً_",
+                        "📝 _للجواب الكامل اكتب:_ *الجواب كامل*",
                         parse_mode=ParseMode.MARKDOWN,
                     )
                     return
@@ -411,12 +434,13 @@ async def route_main(update, context, txt):
     else:
         if OPENROUTER_API_KEY and len(txt.strip()) >= 5:
             await update.effective_message.reply_chat_action("typing")
-            answer = await ask_gemini(txt)
+            answer = await ask_gemini(txt, full=False)
             if answer:
+                context.user_data["last_ai_q"] = txt
                 await update.effective_message.reply_text(
-                    f"🤖 *جواب الذكاء الاصطناعي:*\n\n{answer}\n\n"
+                    f"🤖 *جواب مختصر:*\n\n{answer}\n\n"
                     "━━━━━━━━━━━━━━\n"
-                    "⚠️ _للأمور الفقهية الشخصية، راجع عالماً متخصصاً_",
+                    "📝 _للجواب الكامل اكتب:_ *الجواب كامل*",
                     parse_mode=ParseMode.MARKDOWN,
                 )
                 return
