@@ -4,6 +4,7 @@ import logging
 import datetime
 import asyncio
 import unicodedata
+import requests
 
 from zoneinfo import ZoneInfo
 from hijridate import Hijri, Gregorian
@@ -24,6 +25,7 @@ from content import (
     SALAWAT_TEXT, ISTIJABA_TEXT, SOCIAL_TEXT, KAHF_TEXT, AYAT_KURSI, KHAWATIM_BAQARA, BAQIYAT,
     _SAHABA, _ASHARA_MUBASHARA
 )
+from prayer_data import COUNTRIES, SA_REGIONS, PRAYER_METHODS
 
 
 logging.basicConfig(
@@ -183,36 +185,107 @@ def athar_ashara_keyboard():
     rows.append([InlineKeyboardButton("🔙 رجوع للقائمة", callback_data="menu")])
     return InlineKeyboardMarkup(rows)
 
-def prayer_times_keyboard():
-    return InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("المناطق", callback_data="pt_regions"),
-            InlineKeyboardButton("المدن", callback_data="pt_cities"),
-        ],
-        [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")],
+CITY_MAP = {
+    "AE": ("Abu Dhabi",    "أبو ظبي"),
+    "KW": ("Kuwait",       "الكويت"),
+    "BH": ("Manama",       "المنامة"),
+    "QA": ("Doha",         "الدوحة"),
+    "OM": ("Muscat",       "مسقط"),
+    "YE": ("Sanaa",        "صنعاء"),
+    "JO": ("Amman",        "عمان"),
+    "SY": ("Damascus",     "دمشق"),
+    "LB": ("Beirut",       "بيروت"),
+    "IQ": ("Baghdad",      "بغداد"),
+    "EG": ("Cairo",        "القاهرة"),
+    "LY": ("Tripoli",      "طرابلس"),
+    "TN": ("Tunis",        "تونس"),
+    "DZ": ("Algiers",      "الجزائر"),
+    "MA": ("Rabat",        "الرباط"),
+    "SD": ("Khartoum",     "الخرطوم"),
+    "SO": ("Mogadishu",    "مقديشو"),
+    "PK": ("Islamabad",    "إسلام آباد"),
+    "TR": ("Istanbul",     "إسطنبول"),
+    "ID": ("Jakarta",      "جاكرتا"),
+    "MY": ("Kuala Lumpur", "كوالا لمبور"),
+    "BD": ("Dhaka",        "دكا"),
+    "IN": ("New Delhi",    "نيودلهي"),
+    "GB": ("London",       "لندن"),
+    "US": ("New York",     "نيويورك"),
+    "FR": ("Paris",        "باريس"),
+    "DE": ("Berlin",       "برلين"),
+    "CA": ("Toronto",      "تورنتو"),
+    "AU": ("Sydney",       "سيدني"),
+}
+
+_PR_COUNTRIES = list(COUNTRIES.items())
+_PR_REGIONS   = list(SA_REGIONS.items())
+
+def athar_countries_kb():
+    rows = []
+    for i in range(0, len(_PR_COUNTRIES), 2):
+        row = [InlineKeyboardButton(_PR_COUNTRIES[i][0], callback_data=f"pr_c_{_PR_COUNTRIES[i][1]}")]
+        if i + 1 < len(_PR_COUNTRIES):
+            row.append(InlineKeyboardButton(_PR_COUNTRIES[i+1][0], callback_data=f"pr_c_{_PR_COUNTRIES[i+1][1]}"))
+        rows.append(row)
+    rows.append([InlineKeyboardButton("🔙 رجوع للقائمة", callback_data="menu")])
+    return InlineKeyboardMarkup(rows)
+
+def athar_sa_regions_kb():
+    rows = []
+    for i in range(0, len(_PR_REGIONS), 2):
+        row = [InlineKeyboardButton(_PR_REGIONS[i][0], callback_data=f"pr_r_{i}")]
+        if i + 1 < len(_PR_REGIONS):
+            row.append(InlineKeyboardButton(_PR_REGIONS[i+1][0], callback_data=f"pr_r_{i+1}"))
+        rows.append(row)
+    rows.append([InlineKeyboardButton("🔙 رجوع للدول", callback_data="pr_countries")])
+    return InlineKeyboardMarkup(rows)
+
+def athar_sa_cities_kb(ridx):
+    cities = _PR_REGIONS[ridx][1]
+    rows = []
+    for i in range(0, len(cities), 2):
+        row = [InlineKeyboardButton(cities[i], callback_data=f"pr_ci_{ridx}_{i}")]
+        if i + 1 < len(cities):
+            row.append(InlineKeyboardButton(cities[i+1], callback_data=f"pr_ci_{ridx}_{i+1}"))
+        rows.append(row)
+    rows.append([InlineKeyboardButton("🔙 رجوع للمناطق", callback_data="pr_sa_regions")])
+    return InlineKeyboardMarkup(rows)
+
+async def athar_fetch_prayer(msg, country_code, city_en, city_ar):
+    await msg.reply_text("⏳ جاري جلب أوقات الصلاة...")
+    method = PRAYER_METHODS.get(country_code, PRAYER_METHODS["DEFAULT"])
+    url = f"https://api.aladhan.com/v1/timingsByCity?city={city_en}&country={country_code}&method={method}"
+    def _fetch():
+        try:
+            return requests.get(url, timeout=10).json()
+        except Exception:
+            return None
+    data = await asyncio.get_event_loop().run_in_executor(None, _fetch)
+    if data and data.get("code") == 200:
+        t = data["data"]["timings"]
+        d = data["data"]["date"]
+        hijri = f"{d['hijri']['day']} {d['hijri']['month']['ar']} {d['hijri']['year']} هـ"
+        text = (
+            f"🕌 *أوقات الصلاة*\n"
+            f"📍 *{city_ar}*\n\n"
+            f"📅 {d['readable']}\n"
+            f"🗓️ {hijri}\n\n"
+            "─────────────────────\n"
+            f"🌙 الفجر:   `{t.get('Fajr','─')}`\n"
+            f"🌅 الشروق:  `{t.get('Sunrise','─')}`\n"
+            f"☀️ الظهر:   `{t.get('Dhuhr','─')}`\n"
+            f"🌤️ العصر:   `{t.get('Asr','─')}`\n"
+            f"🌆 المغرب:  `{t.get('Maghrib','─')}`\n"
+            f"🌙 العشاء:  `{t.get('Isha','─')}`\n"
+            "─────────────────────\n\n"
+            "_اللهم اجعلنا من المحافظين على الصلوات_"
+        )
+    else:
+        text = f"⚠️ تعذّر جلب أوقات الصلاة لـ {city_ar}. حاول مرة أخرى."
+    back_kb = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔙 رجوع للدول", callback_data="pr_countries")]
     ])
-
-def regions_keyboard():
-    keys = list(SAUDI_REGIONS.keys())
-    buttons = []
-    for i in range(0, len(keys), 2):
-        row = [InlineKeyboardButton(SAUDI_REGIONS[keys[i]]["name"], callback_data=f"pt_{keys[i]}")]
-        if i + 1 < len(keys):
-            row.append(InlineKeyboardButton(SAUDI_REGIONS[keys[i+1]]["name"], callback_data=f"pt_{keys[i+1]}"))
-        buttons.append(row)
-    buttons.append([InlineKeyboardButton("رجوع", callback_data="prayer_times")])
-    return InlineKeyboardMarkup(buttons)
-
-def cities_keyboard():
-    keys = list(SAUDI_CITIES.keys())
-    buttons = []
-    for i in range(0, len(keys), 2):
-        row = [InlineKeyboardButton(SAUDI_CITIES[keys[i]]["name"], callback_data=f"pt_{keys[i]}")]
-        if i + 1 < len(keys):
-            row.append(InlineKeyboardButton(SAUDI_CITIES[keys[i+1]]["name"], callback_data=f"pt_{keys[i+1]}"))
-        buttons.append(row)
-    buttons.append([InlineKeyboardButton("رجوع", callback_data="prayer_times")])
-    return InlineKeyboardMarkup(buttons)
+    await msg.reply_text(text, parse_mode="Markdown", reply_markup=back_kb)
 
 def prophets_keyboard_page1():
     return InlineKeyboardMarkup([
@@ -683,18 +756,42 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")],
             ])
             await query.message.reply_text(footer_msg(), reply_markup=keyboard)
-    elif data == "prayer_times":
-        await query.message.reply_text("اوقات الصلاة 🤍\n\nاختر المناطق او المدن:", reply_markup=prayer_times_keyboard())
-    elif data == "pt_regions":
-        await query.message.reply_text("اختر المنطقة 🤍", reply_markup=regions_keyboard())
-    elif data == "pt_cities":
-        await query.message.reply_text("اختر المدينة 🤍", reply_markup=cities_keyboard())
-    elif data.startswith("pt_") and data[3:] in {**SAUDI_REGIONS, **SAUDI_CITIES}:
-        location_key = data[3:]
-        text = get_prayer_times_for_location(location_key)
-        await query.message.reply_text(text)
-        await query.message.reply_text(get_separator())
-        await query.message.reply_text(footer_msg(), reply_markup=prayer_times_keyboard())
+    elif data in ("prayer_times", "pr_countries"):
+        await query.message.reply_text(
+            "🕐 *أوقات الصلاة*\n\nاختر الدولة:",
+            parse_mode="Markdown",
+            reply_markup=athar_countries_kb(),
+        )
+    elif data == "pr_sa_regions":
+        await query.message.reply_text(
+            "🗺️ *اختر منطقتك في المملكة العربية السعودية:*",
+            parse_mode="Markdown",
+            reply_markup=athar_sa_regions_kb(),
+        )
+    elif data.startswith("pr_r_"):
+        ridx = int(data[5:])
+        region_name = _PR_REGIONS[ridx][0]
+        await query.message.reply_text(
+            f"🏙️ *اختر مدينتك في {region_name}:*",
+            parse_mode="Markdown",
+            reply_markup=athar_sa_cities_kb(ridx),
+        )
+    elif data.startswith("pr_ci_"):
+        parts = data[6:].split("_")
+        ridx, cidx = int(parts[0]), int(parts[1])
+        city_ar = _PR_REGIONS[ridx][1][cidx]
+        await athar_fetch_prayer(query.message, "SA", city_ar, city_ar)
+    elif data.startswith("pr_c_"):
+        code = data[5:]
+        if code == "SA":
+            await query.message.reply_text(
+                "🗺️ *اختر منطقتك في المملكة العربية السعودية:*",
+                parse_mode="Markdown",
+                reply_markup=athar_sa_regions_kb(),
+            )
+        elif code in CITY_MAP:
+            city_en, city_ar = CITY_MAP[code]
+            await athar_fetch_prayer(query.message, code, city_en, city_ar)
     elif data == "kursi":
         await query.message.reply_text(AYAT_KURSI)
         await query.message.reply_text(get_separator())
@@ -838,7 +935,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if msg == "🌺 آداب اسلامية":
         await _send(get_random_adab); return
     if msg == "🕐 اوقات الصلاة":
-        await update.message.reply_text("اوقات الصلاة 🤍\n\nاختر:", reply_markup=prayer_times_keyboard())
+        await update.message.reply_text("🕐 *أوقات الصلاة*\n\nاختر الدولة:", parse_mode="Markdown", reply_markup=athar_countries_kb())
         return
     if msg == "📢 قناة اثر":
         await update.message.reply_text("📢 قناة اثر:", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("فتح القناة", url="https://t.me/Athar_Atkar")]]))
