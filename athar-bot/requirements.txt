@@ -2,3 +2,4 @@ python-telegram-bot[job-queue]
 hijridate==2.3.0
 pytz
 requests
+aiohttp
