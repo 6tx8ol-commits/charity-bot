@@ -550,6 +550,10 @@ async def job_daily_quiz(context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Failed to send quiz: {e}")
 
 
+async def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    key = "✅ موجود" if OPENROUTER_API_KEY else "❌ غير موجود"
+    await update.message.reply_text(f"🏓 البوت يعمل!\nOPENROUTER_API_KEY: {key}")
+
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user(update.effective_user)
     await update.message.reply_text(WELCOME_TEXT, reply_markup=main_keyboard())
@@ -1010,6 +1014,7 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("help",   cmd_athar))
     app.add_handler(CommandHandler("athar",  cmd_athar))
     app.add_handler(CommandHandler("users",  cmd_users))
+    app.add_handler(CommandHandler("ping",   cmd_ping))
     app.add_handler(CommandHandler("testai", cmd_testai))
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
