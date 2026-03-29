@@ -75,15 +75,29 @@ TOKEN = os.environ.get("BOT_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
-GEMINI_SYSTEM_PROMPT = """أنت مساعد إسلامي متخصص في الإجابة على الأسئلة الدينية والشرعية.
+GEMINI_SYSTEM_PROMPT = """أنت مساعد إسلامي عالم ومتخصص في جميع علوم الإسلام، تجيب على أسئلة المسلمين بعلم ورويّة.
+
+مجالاتك:
+- العقيدة الإسلامية: التوحيد، أسماء الله وصفاته، الملائكة، الكتب، الرسل، اليوم الآخر، القدر
+- القرآن الكريم: معاني الآيات، التفسير، أسباب النزول، فضائل السور
+- الحديث النبوي الشريف: شرح الأحاديث، درجاتها، رواتها
+- الفقه والأحكام: الطهارة، الصلاة، الزكاة، الصوم، الحج، المعاملات، الحلال والحرام
+- السيرة النبوية وسير الأنبياء والصحابة والتابعين
+- أخبار الجنة والنار وأهوال يوم القيامة وعلاماته
+- التوبة والاستغفار وأحكام العاصين والفاسقين والكفار
+- الشيطان والجن وعوامل الوسوسة والتحصين
+- الأذكار والأدعية والرقية الشرعية
+- الأخلاق والآداب الإسلامية
+- الفرق والمذاهب الإسلامية (بموضوعية وعلم)
+- تاريخ الإسلام والحضارة الإسلامية
 
 قواعدك:
-- أجب بالعربية الواضحة والمفهومة
-- استند إلى القرآن الكريم والسنة النبوية الصحيحة فقط
-- اذكر المصادر: (اسم السورة ورقم الآية) أو (اسم الحديث وراويه ودرجته)
-- كن موجزاً ومفيداً وابتعد عن الحشو
-- في المسائل الفقهية الدقيقة أو الفتاوى الشخصية: انصح بمراجعة عالم متخصص
-- لا تتكلم في موضوعات خارج الإسلام والدين"""
+- أجب بالعربية الواضحة المفهومة
+- استند دائماً إلى القرآن والسنة الصحيحة
+- اذكر المصدر: (سورة ... آية ...) أو (رواه ... وهو صحيح/حسن)
+- كن دقيقاً وموجزاً، لا تطوّل بلا فائدة
+- في الفتاوى الشخصية الدقيقة: انصح بمراجعة عالم متخصص
+- لا تتكلم في أمور دنيوية بحتة لا علاقة لها بالدين"""
 
 
 async def ask_gemini(question: str) -> str | None:
@@ -151,20 +165,34 @@ def get_date_line():
 
 
 def main_keyboard():
-    return ReplyKeyboardMarkup([
-        ["📖 القرآن الكريم"],
-        ["🌿 الاذكار اليومية", "🤲 دعاء"],
-        ["🕊️ ادعية الانبياء", "✨ آية قرآنية"],
-        ["🌙 السيرة النبوية", "⭐ قصة صحابي"],
-        ["📜 قصة قرآنية", "💎 الباقيات الصالحات"],
-        ["🛡️ تحصين النفس", "🔵 آية الكرسي"],
-        ["📚 حديث نبوي", "🌟 اسماء الله الحسنى"],
-        ["🌸 فضائل الاعمال", "🕌 اذكار بعد الصلاة"],
-        ["💫 الاستغفار", "🌺 آداب اسلامية"],
-        ["🕐 اوقات الصلاة"],
-        ["🌐 الموقع الرسمي", "📢 قناة اثر"],
-        ["📸 انستقرام", "🎬 تيك توك"],
-    ], resize_keyboard=True)
+    return ReplyKeyboardMarkup([["📋 القائمة"]], resize_keyboard=True)
+
+
+def main_inline_menu():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("📖 القرآن الكريم", callback_data="quran_menu")],
+        [InlineKeyboardButton("🌿 الاذكار اليومية", callback_data="azkar_daily"),
+         InlineKeyboardButton("🤲 دعاء", callback_data="dua")],
+        [InlineKeyboardButton("🕊️ ادعية الانبياء", callback_data="dua_nabi"),
+         InlineKeyboardButton("✨ آية قرآنية", callback_data="ayah")],
+        [InlineKeyboardButton("🌙 السيرة النبوية", callback_data="prophets_menu"),
+         InlineKeyboardButton("⭐ قصة صحابي", callback_data="sahabi")],
+        [InlineKeyboardButton("📜 قصة قرآنية", callback_data="quran_story"),
+         InlineKeyboardButton("💎 الباقيات الصالحات", callback_data="baqiyat")],
+        [InlineKeyboardButton("🛡️ تحصين النفس", callback_data="tahseen"),
+         InlineKeyboardButton("🔵 آية الكرسي", callback_data="kursi")],
+        [InlineKeyboardButton("📚 حديث نبوي", callback_data="hadith"),
+         InlineKeyboardButton("🌟 اسماء الله الحسنى", callback_data="asma")],
+        [InlineKeyboardButton("🌸 فضائل الاعمال", callback_data="fadail"),
+         InlineKeyboardButton("🕌 اذكار بعد الصلاة", callback_data="azkar_salah")],
+        [InlineKeyboardButton("💫 الاستغفار", callback_data="istighfar"),
+         InlineKeyboardButton("🌺 آداب اسلامية", callback_data="adab")],
+        [InlineKeyboardButton("🕐 اوقات الصلاة", callback_data="prayer_times")],
+        [InlineKeyboardButton("🌐 الموقع الرسمي", url="https://legendary-yeot-b80ee7.netlify.app/"),
+         InlineKeyboardButton("📢 قناة اثر", url="https://t.me/Athar_Atkar")],
+        [InlineKeyboardButton("📸 انستقرام", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
+         InlineKeyboardButton("🎬 تيك توك", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4")],
+    ])
 
 
 def back_keyboard():
@@ -520,11 +548,11 @@ async def job_daily_quiz(context: ContextTypes.DEFAULT_TYPE):
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user(update.effective_user)
-    await update.message.reply_text(".", reply_markup=ReplyKeyboardRemove())
     await update.message.reply_text(WELCOME_TEXT, reply_markup=main_keyboard())
+    await update.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
 
 async def cmd_athar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
+    await update.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
 
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -546,7 +574,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
     if data == "menu":
-        await query.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
+        await query.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
         return
     elif data == "azkar_daily":
         await query.message.reply_text("الاذكار اليومية 🤍\n\nاختر:", reply_markup=azkar_daily_keyboard())
@@ -672,7 +700,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text(get_separator())
         await query.message.reply_text(footer_msg(), reply_markup=back_keyboard())
     else:
-        await query.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
+        await query.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
 
 
 def _strip(text):
@@ -741,8 +769,8 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(footer_msg(), reply_markup=back_keyboard())
         return
 
-    if msg in ("اثر", "أثر", "القائمة", "المساعدة", "🔙 القائمة الرئيسية"):
-        await update.message.reply_text(HELP_TEXT, reply_markup=main_keyboard())
+    if msg in ("اثر", "أثر", "القائمة", "المساعدة", "🔙 القائمة الرئيسية", "📋 القائمة"):
+        await update.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
         return
 
     # ══ أزرار القائمة الرئيسية ══
