@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import random
+import asyncio
 import threading
 import aiohttp
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -74,6 +75,58 @@ async def cmd_users(update, context):
 logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv("AZKAR_BOT_TOKEN")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
+GEMINI_SYSTEM_PROMPT = """أنت مساعد إسلامي عالم ومتخصص في جميع علوم الإسلام، تجيب على أسئلة المسلمين بعلم ورويّة.
+
+مجالاتك:
+- العقيدة الإسلامية: التوحيد، أسماء الله وصفاته، الملائكة، الكتب، الرسل، اليوم الآخر، القدر
+- القرآن الكريم: معاني الآيات، التفسير، أسباب النزول، فضائل السور
+- الحديث النبوي الشريف: شرح الأحاديث، درجاتها، رواتها
+- الفقه والأحكام: الطهارة، الصلاة، الزكاة، الصوم، الحج، المعاملات، الحلال والحرام
+- السيرة النبوية وسير الأنبياء والصحابة والتابعين
+- أخبار الجنة والنار وأهوال يوم القيامة وعلاماته
+- التوبة والاستغفار وأحكام العاصين والفاسقين والكفار
+- الشيطان والجن وعوامل الوسوسة والتحصين
+- الأذكار والأدعية والرقية الشرعية
+- الأخلاق والآداب الإسلامية
+- الفرق والمذاهب الإسلامية (بموضوعية وعلم)
+- تاريخ الإسلام والحضارة الإسلامية
+
+قواعدك:
+- أجب بالعربية الواضحة المفهومة
+- استند دائماً إلى القرآن والسنة الصحيحة
+- اذكر المصدر: (سورة ... آية ...) أو (رواه ... وهو صحيح/حسن)
+- كن دقيقاً وموجزاً، لا تطوّل بلا فائدة
+- في الفتاوى الشخصية الدقيقة: انصح بمراجعة عالم متخصص
+- لا تتكلم في أمور دنيوية بحتة لا علاقة لها بالدين"""
+
+
+async def ask_gemini(question: str) -> str | None:
+    if not GEMINI_API_KEY:
+        return None
+
+    def _call():
+        import requests as _req
+        resp = _req.post(
+            f"{GEMINI_URL}?key={GEMINI_API_KEY}",
+            json={
+                "system_instruction": {"parts": [{"text": GEMINI_SYSTEM_PROMPT}]},
+                "contents": [{"parts": [{"text": question}]}],
+                "generationConfig": {"maxOutputTokens": 600, "temperature": 0.3},
+            },
+            timeout=20,
+        )
+        data = resp.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"]
+
+    try:
+        return await asyncio.to_thread(_call)
+    except Exception as e:
+        logging.getLogger(__name__).warning(f"Gemini error: {e}")
+        return None
+
 
 # ─── الأشهر والأيام بالعربي ────────────────────────────
 _MONTHS_AR  = ["يناير","فبراير","مارس","أبريل","مايو","يونيو",
@@ -132,21 +185,33 @@ async def reply(update, text, markup=None, md=True):
 
 # ─── KEYBOARDS ─────────────────────────────────────────
 
-MAIN_KB = kb([
-    ["📖 القرآن الكريم"],
-    ["🌅 الاذكار اليومية",   "🤲 دعاء"],
-    ["🌟 آية قرآنية",        "🕌 ادعية الانبياء"],
-    ["📚 قصة صحابي",         "🌙 السيرة النبوية"],
-    ["💎 الباقيات الصالحات", "📜 قصة قرآنية"],
-    ["🛡️ آية الكرسي",        "🔰 تحصين النفس"],
-    ["📿 اسماء الله الحسنى", "📝 حديث نبوي"],
-    ["🕌 اذكار بعد الصلاة",  "⭐ فضائل الاعمال"],
-    ["🌺 آداب اسلامية",      "🙏 الاستغفار"],
-    ["🕐 اوقات الصلاة"],
-    ["🎙️ صوتيه تكبيرات للاستاذ غازي عجاج"],
-])
+MAIN_KB = kb([["📋 القائمة"]])
 
-BACK_MAIN = "🔙 القائمة الرئيسية"
+BACK_MAIN = "📋 القائمة"
+
+
+def main_inline_menu_ghazi():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("📖 القرآن الكريم", callback_data="gmenu_quran")],
+        [InlineKeyboardButton("🌅 الاذكار اليومية", callback_data="gmenu_azkar"),
+         InlineKeyboardButton("🤲 دعاء", callback_data="gmenu_dua")],
+        [InlineKeyboardButton("🌟 آية قرآنية", callback_data="gmenu_aya"),
+         InlineKeyboardButton("🕌 ادعية الانبياء", callback_data="gmenu_prophets")],
+        [InlineKeyboardButton("📚 قصة صحابي", callback_data="gmenu_sahaba"),
+         InlineKeyboardButton("🌙 السيرة النبوية", callback_data="gmenu_seerah")],
+        [InlineKeyboardButton("💎 الباقيات الصالحات", callback_data="gmenu_baqiyat"),
+         InlineKeyboardButton("📜 قصة قرآنية", callback_data="gmenu_qstories")],
+        [InlineKeyboardButton("🛡️ آية الكرسي", callback_data="gmenu_kursi"),
+         InlineKeyboardButton("🔰 تحصين النفس", callback_data="gmenu_tahsin")],
+        [InlineKeyboardButton("📿 اسماء الله الحسنى", callback_data="gmenu_asma"),
+         InlineKeyboardButton("📝 حديث نبوي", callback_data="gmenu_hadith")],
+        [InlineKeyboardButton("🕌 اذكار بعد الصلاة", callback_data="gmenu_azkar_salah"),
+         InlineKeyboardButton("⭐ فضائل الاعمال", callback_data="gmenu_fadhail")],
+        [InlineKeyboardButton("🌺 آداب اسلامية", callback_data="gmenu_adab"),
+         InlineKeyboardButton("🙏 الاستغفار", callback_data="gmenu_istighfar")],
+        [InlineKeyboardButton("🕐 اوقات الصلاة", callback_data="gmenu_prayer")],
+        [InlineKeyboardButton("🎙️ صوتيه تكبيرات للاستاذ غازي", callback_data="gmenu_takbeer")],
+    ])
 
 # ─── WELCOME ───────────────────────────────────────────
 
@@ -160,7 +225,10 @@ WELCOME = (
 
 async def show_main(update, context, text=None):
     set_state(context, "main")
-    await reply(update, text or WELCOME, MAIN_KB)
+    full = (text or WELCOME) + get_footer()
+    await update.effective_message.reply_text(full, parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KB)
+    await update.effective_message.reply_text(DUA_GHAZI)
+    await update.effective_message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu_ghazi())
 
 # ─── START ─────────────────────────────────────────────
 
@@ -174,7 +242,7 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     txt = update.message.text.strip()
     s   = state(context)
 
-    if txt == BACK_MAIN:
+    if txt in (BACK_MAIN, "📋 القائمة", "🔙 القائمة الرئيسية"):
         await show_main(update, context)
         return
 
@@ -250,6 +318,17 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=ghazi_surah_keyboard(surah['number']),
             )
         else:
+            if GEMINI_API_KEY and len(txt.strip()) >= 5:
+                await update.effective_message.reply_chat_action("typing")
+                answer = await ask_gemini(txt)
+                if answer:
+                    await update.effective_message.reply_text(
+                        f"🤖 *جواب الذكاء الاصطناعي:*\n\n{answer}\n\n"
+                        "━━━━━━━━━━━━━━\n"
+                        "⚠️ _للأمور الفقهية الشخصية، راجع عالماً متخصصاً_",
+                        parse_mode=ParseMode.MARKDOWN,
+                    )
+                    return
             await route_main(update, context, txt)
 
 # ═══════════════════════════════════════════════════════
@@ -374,6 +453,38 @@ async def handle_ghazi_quran_callback(update, context):
     if data == "ghazi_back_surahs":
         page = context.user_data.get("ghazi_quran_page", 0)
         await show_surah_page(update, context, page)
+
+
+async def handle_ghazi_menu_callback(update, context):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    _map = {
+        "gmenu_quran":      show_quran_menu,
+        "gmenu_azkar":      show_azkar_menu,
+        "gmenu_dua":        show_random_dua,
+        "gmenu_aya":        show_random_aya,
+        "gmenu_prophets":   show_prophets_list,
+        "gmenu_seerah":     show_seerah_menu,
+        "gmenu_sahaba":     show_sahaba_list,
+        "gmenu_baqiyat":    show_baqiyat,
+        "gmenu_qstories":   show_quran_stories_list,
+        "gmenu_kursi":      show_ayat_karima,
+        "gmenu_tahsin":     show_tahsin_menu,
+        "gmenu_hadith":     show_hadith,
+        "gmenu_azkar_salah": show_after_prayer_azkar,
+        "gmenu_fadhail":    show_fadhail_menu,
+        "gmenu_adab":       show_adab_menu,
+        "gmenu_istighfar":  show_istighfar_menu,
+        "gmenu_prayer":     show_prayer_countries,
+        "gmenu_takbeer":    send_ghazi_audio,
+    }
+    if data == "gmenu_asma":
+        await show_asma_page(update, context, 0)
+        return
+    fn = _map.get(data)
+    if fn:
+        await fn(update, context)
 
 async def route_quran(update, context, txt):
     if txt == "📚 قائمة السور الـ 114":
@@ -1209,6 +1320,7 @@ def main():
     app.add_handler(CommandHandler("menu",  cmd_start))
     app.add_handler(CommandHandler("users", cmd_users))
     app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(ghazi_back_surahs|noop)$"))
+    app.add_handler(CallbackQueryHandler(handle_ghazi_menu_callback, pattern=r"^gmenu_"))
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_msg
     ))
