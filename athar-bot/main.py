@@ -138,8 +138,7 @@ def main_inline_menu():
         [InlineKeyboardButton("💫 الاستغفار", callback_data="istighfar"),
          InlineKeyboardButton("🌺 آداب اسلامية", callback_data="adab")],
         [InlineKeyboardButton("🕐 اوقات الصلاة", callback_data="prayer_times")],
-        [InlineKeyboardButton("🌐 الموقع الرسمي", url="https://legendary-yeot-b80ee7.netlify.app/"),
-         InlineKeyboardButton("📢 قناة اثر", url="https://t.me/Athar_Atkar")],
+        [InlineKeyboardButton("📢 قناة اثر", url="https://t.me/Athar_Atkar")],
         [InlineKeyboardButton("📸 انستقرام", url="https://www.instagram.com/1947_1951?igsh=bnA3cXloanFvazJx&utm_source=qr"),
          InlineKeyboardButton("🎬 تيك توك", url="https://www.tiktok.com/@1947_1951?_r=1&_t=ZS-94zjaTgMqE4")],
     ])
@@ -779,9 +778,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _send(get_random_adab); return
     if msg == "🕐 اوقات الصلاة":
         await update.message.reply_text("اوقات الصلاة 🤍\n\nاختر:", reply_markup=prayer_times_keyboard())
-        return
-    if msg == "🌐 الموقع الرسمي":
-        await update.message.reply_text("🌐 الموقع الرسمي:", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("فتح الموقع", url="https://legendary-yeot-b80ee7.netlify.app/")]]))
         return
     if msg == "📢 قناة اثر":
         await update.message.reply_text("📢 قناة اثر:", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("فتح القناة", url="https://t.me/Athar_Atkar")]]))
