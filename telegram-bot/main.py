@@ -75,47 +75,6 @@ async def cmd_users(update, context):
 logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv("AZKAR_BOT_TOKEN")
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-OPENROUTER_MODEL = "google/gemma-3-4b-it:free"
-
-_AI_SHORT_PROMPT = "أنت مساعد إسلامي. أجب في ٢-٣ جمل فقط بالعربية، ركّز على جوهر الجواب فقط باختصار."
-_AI_FULL_PROMPT  = """أنت مساعد إسلامي متخصص. أجب بالعربية بشكل مفصّل وشامل.
-- استند للقرآن والسنة واذكر المصادر
-- للفتاوى الشخصية: انصح بمراجعة عالم
-- لا تتكلم في أمور غير دينية"""
-
-_FULL_ANSWER_TRIGGERS = {"الجواب كامل", "جواب كامل", "الكامل", "كامل"}
-
-
-async def ask_gemini(question: str, full: bool = False) -> str | None:
-    if not OPENROUTER_API_KEY:
-        return None
-    prompt     = _AI_FULL_PROMPT  if full else _AI_SHORT_PROMPT
-    max_tokens = 500              if full else 110
-    timeout    = 30               if full else 12
-    payload = {
-        "model": OPENROUTER_MODEL,
-        "messages": [
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": question},
-        ],
-        "max_tokens": max_tokens,
-        "temperature": 0.3,
-    }
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                OPENROUTER_URL,
-                json=payload,
-                headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-                timeout=aiohttp.ClientTimeout(total=timeout),
-            ) as resp:
-                data = await resp.json()
-                return data["choices"][0]["message"]["content"]
-    except Exception as e:
-        logging.getLogger(__name__).warning(f"OpenRouter error: {e}")
-        return None
 
 
 # ─── الأشهر والأيام بالعربي ────────────────────────────
@@ -218,7 +177,7 @@ async def show_main(update, context, text=None):
     combined = (
         (text or WELCOME)
         + "\n\n━━━━━━━━━━━━━━\n"
-        "📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍"
+        "📋 *اختر ما تريد:*"
         + get_footer()
     )
     await update.effective_message.reply_text(combined, parse_mode=ParseMode.MARKDOWN, reply_markup=main_inline_menu_ghazi())
@@ -230,44 +189,7 @@ async def cmd_start(update, context):
     await show_main(update, context)
 
 async def cmd_ping(update, context):
-    key = "✅ موجود" if OPENROUTER_API_KEY else "❌ غير موجود"
-    await update.message.reply_text(f"🏓 البوت يعمل!\nOPENROUTER_API_KEY: {key}")
-
-async def cmd_testai(update, context):
-    key_set = bool(OPENROUTER_API_KEY)
-    key_preview = f"{OPENROUTER_API_KEY[:8]}..." if key_set else "---"
-    if not key_set:
-        await update.message.reply_text("❌ OPENROUTER_API_KEY غير موجود في Render.")
-        return
-    await update.message.reply_chat_action("typing")
-    payload = {
-        "model": OPENROUTER_MODEL,
-        "messages": [
-            {"role": "system", "content": "أنت مساعد إسلامي"},
-            {"role": "user", "content": "ما هي أركان الإسلام الخمسة؟"},
-        ],
-        "max_tokens": 200,
-    }
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                OPENROUTER_URL,
-                json=payload,
-                headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-                timeout=aiohttp.ClientTimeout(total=30),
-            ) as resp:
-                data = await resp.json()
-                if "choices" in data:
-                    text = data["choices"][0]["message"]["content"]
-                    await update.message.reply_text(f"✅ الذكاء الاصطناعي يعمل:\n\n{text[:300]}")
-                else:
-                    err = data.get("error", {})
-                    await update.message.reply_text(
-                        f"❌ خطأ:\nكود: {err.get('code')}\n{err.get('message','؟')}\n"
-                        f"المفتاح يبدأ بـ: {key_preview}"
-                    )
-    except Exception as e:
-        await update.message.reply_text(f"❌ استثناء: {e}")
+    await update.message.reply_text("🏓 البوت يعمل!")
 
 # ─── MESSAGE ROUTER ─────────────────────────────────────
 
@@ -277,22 +199,6 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if txt in (BACK_MAIN, "📋 القائمة", "🔙 القائمة الرئيسية"):
         await show_main(update, context)
-        return
-
-    if txt in _FULL_ANSWER_TRIGGERS:
-        last_q = context.user_data.get("last_ai_q")
-        if last_q and OPENROUTER_API_KEY:
-            await update.effective_message.reply_chat_action("typing")
-            full_ans = await ask_gemini(last_q, full=True)
-            if full_ans:
-                await update.effective_message.reply_text(
-                    f"🤖 *الجواب الكامل:*\n\n{full_ans}\n\n"
-                    "━━━━━━━━━━━━━━\n"
-                    "⚠️ _للأمور الفقهية الشخصية، راجع عالماً متخصصاً_",
-                    parse_mode=ParseMode.MARKDOWN,
-                )
-                return
-        await update.effective_message.reply_text("لا يوجد سؤال سابق، اكتب سؤالك أولاً 🤍")
         return
 
     # اسم السورة يشتغل بصرف النظر عن الـ state
@@ -367,23 +273,6 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=ghazi_surah_keyboard(surah['number']),
             )
         else:
-            if OPENROUTER_API_KEY and len(txt.strip()) >= 5:
-                wait_msg = await update.effective_message.reply_text("⏳ جاري التفكير...")
-                answer = await ask_gemini(txt, full=False)
-                await wait_msg.delete()
-                if answer:
-                    context.user_data["last_ai_q"] = txt
-                    await update.effective_message.reply_text(
-                        f"🤖 *جواب مختصر:*\n\n{answer}\n\n"
-                        "━━━━━━━━━━━━━━\n"
-                        "📝 _للجواب الكامل اكتب:_ *الجواب كامل*",
-                        parse_mode=ParseMode.MARKDOWN,
-                    )
-                    return
-                await update.effective_message.reply_text(
-                    "⚠️ لم أستطع الإجابة الآن، حاول مرة أخرى بعد لحظات 🙏"
-                )
-                return
             await route_main(update, context, txt)
 
 # ═══════════════════════════════════════════════════════
@@ -440,25 +329,8 @@ async def route_main(update, context, txt):
     elif txt == "🔄 حديث آخر":
         await show_hadith(update, context)
     else:
-        if OPENROUTER_API_KEY and len(txt.strip()) >= 5:
-            wait_msg = await update.effective_message.reply_text("⏳ جاري التفكير...")
-            answer = await ask_gemini(txt, full=False)
-            await wait_msg.delete()
-            if answer:
-                context.user_data["last_ai_q"] = txt
-                await update.effective_message.reply_text(
-                    f"🤖 *جواب مختصر:*\n\n{answer}\n\n"
-                    "━━━━━━━━━━━━━━\n"
-                    "📝 _للجواب الكامل اكتب:_ *الجواب كامل*",
-                    parse_mode=ParseMode.MARKDOWN,
-                )
-                return
-            await update.effective_message.reply_text(
-                "⚠️ لم أستطع الإجابة الآن، حاول مرة أخرى بعد لحظات 🙏"
-            )
-            return
         await update.effective_message.reply_text(
-            "📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍",
+            "📋 *اختر ما تريد:*",
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=main_inline_menu_ghazi(),
         )
@@ -1398,7 +1270,7 @@ def main():
     app.add_handler(CommandHandler("menu",   cmd_start))
     app.add_handler(CommandHandler("users",  cmd_users))
     app.add_handler(CommandHandler("ping",   cmd_ping))
-    app.add_handler(CommandHandler("testai", cmd_testai))
+
     app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(ghazi_back_surahs|noop)$"))
     app.add_handler(CallbackQueryHandler(handle_ghazi_menu_callback, pattern=r"^gmenu_"))
     app.add_handler(MessageHandler(
