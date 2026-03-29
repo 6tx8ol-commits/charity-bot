@@ -1052,6 +1052,17 @@ def build_application() -> Application:
 
 
 if __name__ == "__main__":
+    import time as _time
+    import telegram as _tg
     application = build_application()
     print("البوت بدأ العمل الآن... 🚀")
-    application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+    while True:
+        try:
+            application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+            break
+        except _tg.error.Conflict:
+            logger.warning("⚡ Conflict — نسخة أخرى تعمل، انتظر 40 ثانية...")
+            _time.sleep(40)
+        except Exception as e:
+            logger.error(f"خطأ غير متوقع: {e}")
+            raise
