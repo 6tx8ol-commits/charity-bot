@@ -365,8 +365,9 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         else:
             if OPENROUTER_API_KEY and len(txt.strip()) >= 5:
-                await update.effective_message.reply_chat_action("typing")
+                wait_msg = await update.effective_message.reply_text("⏳ جاري التفكير...")
                 answer = await ask_gemini(txt, full=False)
+                await wait_msg.delete()
                 if answer:
                     context.user_data["last_ai_q"] = txt
                     await update.effective_message.reply_text(
@@ -376,6 +377,10 @@ async def handle_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         parse_mode=ParseMode.MARKDOWN,
                     )
                     return
+                await update.effective_message.reply_text(
+                    "⚠️ لم أستطع الإجابة الآن، حاول مرة أخرى بعد لحظات 🙏"
+                )
+                return
             await route_main(update, context, txt)
 
 # ═══════════════════════════════════════════════════════
@@ -433,8 +438,9 @@ async def route_main(update, context, txt):
         await show_hadith(update, context)
     else:
         if OPENROUTER_API_KEY and len(txt.strip()) >= 5:
-            await update.effective_message.reply_chat_action("typing")
+            wait_msg = await update.effective_message.reply_text("⏳ جاري التفكير...")
             answer = await ask_gemini(txt, full=False)
+            await wait_msg.delete()
             if answer:
                 context.user_data["last_ai_q"] = txt
                 await update.effective_message.reply_text(
@@ -444,6 +450,10 @@ async def route_main(update, context, txt):
                     parse_mode=ParseMode.MARKDOWN,
                 )
                 return
+            await update.effective_message.reply_text(
+                "⚠️ لم أستطع الإجابة الآن، حاول مرة أخرى بعد لحظات 🙏"
+            )
+            return
         await update.effective_message.reply_text(
             "📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍",
             parse_mode=ParseMode.MARKDOWN,
