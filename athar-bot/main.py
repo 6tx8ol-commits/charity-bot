@@ -1054,4 +1054,4 @@ def build_application() -> Application:
 if __name__ == "__main__":
     application = build_application()
     print("البوت بدأ العمل الآن... 🚀")
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
