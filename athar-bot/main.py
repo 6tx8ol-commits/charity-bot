@@ -22,7 +22,7 @@ from content import (
     SAUDI_REGIONS, SAUDI_CITIES, PROPHETS, QURAN_SURAHS, ALLAH_NAMES,
     WELCOME_TEXT, HELP_TEXT, MORNING_AZKAR_TEXT, EVENING_AZKAR_TEXT, SLEEP_AZKAR_TEXT,
     SALAWAT_TEXT, ISTIJABA_TEXT, SOCIAL_TEXT, KAHF_TEXT, AYAT_KURSI, KHAWATIM_BAQARA, BAQIYAT,
-    _SAHABA
+    _SAHABA, _ASHARA_MUBASHARA
 )
 
 
@@ -128,6 +128,7 @@ def main_inline_menu():
          InlineKeyboardButton("✨ آية قرآنية", callback_data="ayah")],
         [InlineKeyboardButton("🌙 السيرة النبوية", callback_data="prophets_menu"),
          InlineKeyboardButton("⭐ قصة صحابي", callback_data="sahabi")],
+        [InlineKeyboardButton("🌟 العشرة المبشرون بالجنة", callback_data="ashara")],
         [InlineKeyboardButton("📜 قصة قرآنية", callback_data="quran_story"),
          InlineKeyboardButton("💎 الباقيات الصالحات", callback_data="baqiyat")],
         [InlineKeyboardButton("🛡️ تحصين النفس", callback_data="tahseen"),
@@ -166,6 +167,18 @@ def athar_sahaba_keyboard():
         row = [InlineKeyboardButton(ATHAR_SAHABA_NAMES[i], callback_data=f"athar_sah_{i}")]
         if i + 1 < len(ATHAR_SAHABA_NAMES):
             row.append(InlineKeyboardButton(ATHAR_SAHABA_NAMES[i + 1], callback_data=f"athar_sah_{i+1}"))
+        rows.append(row)
+    rows.append([InlineKeyboardButton("🔙 رجوع للقائمة", callback_data="menu")])
+    return InlineKeyboardMarkup(rows)
+
+ATHAR_ASHARA_NAMES = [e.split("\n\n")[0] for e in _ASHARA_MUBASHARA]
+
+def athar_ashara_keyboard():
+    rows = []
+    for i in range(0, len(ATHAR_ASHARA_NAMES), 2):
+        row = [InlineKeyboardButton(ATHAR_ASHARA_NAMES[i], callback_data=f"athar_ash_{i}")]
+        if i + 1 < len(ATHAR_ASHARA_NAMES):
+            row.append(InlineKeyboardButton(ATHAR_ASHARA_NAMES[i + 1], callback_data=f"athar_ash_{i+1}"))
         rows.append(row)
     rows.append([InlineKeyboardButton("🔙 رجوع للقائمة", callback_data="menu")])
     return InlineKeyboardMarkup(rows)
@@ -538,6 +551,25 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         content = _SAHABA[idx]
         back_kb = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔙 رجوع للصحابة", callback_data="sahabi")]
+        ])
+        await query.message.reply_text(content, reply_markup=back_kb)
+        return
+
+    if data == "ashara":
+        await query.message.reply_text(
+            "🌟 *العشرة المبشرون بالجنة رضي الله عنهم*\n\n"
+            "قال النبي ﷺ: ❝ أبو بكر في الجنة، وعمر في الجنة، وعثمان في الجنة، وعلي في الجنة، وطلحة في الجنة، والزبير في الجنة، وعبد الرحمن بن عوف في الجنة، وسعد في الجنة، وسعيد في الجنة، وأبو عبيدة بن الجراح في الجنة ❞\n\n"
+            "اختر أحد الصحابة الكرام:",
+            parse_mode="Markdown",
+            reply_markup=athar_ashara_keyboard(),
+        )
+        return
+
+    if data.startswith("athar_ash_"):
+        idx = int(data.split("_")[2])
+        content = _ASHARA_MUBASHARA[idx]
+        back_kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 رجوع للعشرة", callback_data="ashara")]
         ])
         await query.message.reply_text(content, reply_markup=back_kb)
         return
