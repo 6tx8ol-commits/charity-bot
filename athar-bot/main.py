@@ -75,7 +75,7 @@ async def cmd_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 TOKEN = os.environ.get("BOT_TOKEN")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct:free"
+OPENROUTER_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
 
 AI_SYSTEM_PROMPT = """أنت مساعد إسلامي عالم ومتخصص في جميع علوم الإسلام، تجيب على أسئلة المسلمين بعلم ورويّة.
 
@@ -111,7 +111,7 @@ async def ask_gemini(question: str) -> str | None:
             {"role": "system", "content": AI_SYSTEM_PROMPT},
             {"role": "user", "content": question},
         ],
-        "max_tokens": 600,
+        "max_tokens": 350,
         "temperature": 0.3,
     }
     try:
@@ -120,7 +120,7 @@ async def ask_gemini(question: str) -> str | None:
                 OPENROUTER_URL,
                 json=payload,
                 headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-                timeout=aiohttp.ClientTimeout(total=30),
+                timeout=aiohttp.ClientTimeout(total=20),
             ) as resp:
                 data = await resp.json()
                 return data["choices"][0]["message"]["content"]
