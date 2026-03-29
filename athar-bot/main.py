@@ -549,10 +549,21 @@ async def job_daily_quiz(context: ContextTypes.DEFAULT_TYPE):
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user(update.effective_user)
     await update.message.reply_text(WELCOME_TEXT, reply_markup=main_keyboard())
-    await update.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
+    await update.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
 
 async def cmd_athar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("📋 القائمة الرئيسية:", reply_markup=main_inline_menu())
+    await update.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
+
+async def cmd_testai(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not GEMINI_API_KEY:
+        await update.message.reply_text("❌ GEMINI_API_KEY غير موجود في المتغيرات. تحقق من Render.")
+        return
+    await update.message.reply_chat_action("typing")
+    answer = await ask_gemini("ما هي أركان الإسلام الخمسة؟")
+    if answer:
+        await update.message.reply_text(f"✅ الذكاء الاصطناعي يعمل:\n\n{answer[:300]}...")
+    else:
+        await update.message.reply_text("❌ المفتاح موجود لكن الطلب فشل. تحقق من صحة المفتاح.")
 
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -966,10 +977,11 @@ def build_application() -> Application:
 
     app = Application.builder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler("start", cmd_start))
-    app.add_handler(CommandHandler("help", cmd_athar))
-    app.add_handler(CommandHandler("athar", cmd_athar))
-    app.add_handler(CommandHandler("users", cmd_users))
+    app.add_handler(CommandHandler("start",  cmd_start))
+    app.add_handler(CommandHandler("help",   cmd_athar))
+    app.add_handler(CommandHandler("athar",  cmd_athar))
+    app.add_handler(CommandHandler("users",  cmd_users))
+    app.add_handler(CommandHandler("testai", cmd_testai))
     app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(ChatMemberHandler(handle_new_member, ChatMemberHandler.CHAT_MEMBER))
