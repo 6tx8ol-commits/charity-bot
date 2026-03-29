@@ -1405,8 +1405,19 @@ def main():
         filters.TEXT & ~filters.COMMAND, handle_msg
     ))
 
+    import time as _time
+    import telegram as _tg
     logger.info("🤖 البوت يعمل...")
-    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+    while True:
+        try:
+            app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+            break
+        except _tg.error.Conflict:
+            logger.warning("⚡ Conflict — نسخة أخرى تعمل، انتظر 40 ثانية...")
+            _time.sleep(40)
+        except Exception as e:
+            logger.error(f"خطأ غير متوقع: {e}")
+            raise
 
 if __name__ == "__main__":
     main()
