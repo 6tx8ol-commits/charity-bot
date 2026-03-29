@@ -543,8 +543,12 @@ async def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_user(update.effective_user)
-    await update.message.reply_text(WELCOME_TEXT, reply_markup=main_keyboard())
-    await update.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
+    combined = (
+        WELCOME_TEXT
+        + "\n\n━━━━━━━━━━━━━━\n"
+        "📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍"
+    )
+    await update.message.reply_text(combined, parse_mode="Markdown", reply_markup=main_inline_menu())
 
 async def cmd_athar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode="Markdown", reply_markup=main_inline_menu())
