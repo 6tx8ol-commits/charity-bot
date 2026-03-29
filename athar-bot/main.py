@@ -955,8 +955,9 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
     if OPENROUTER_API_KEY and len(msg.strip()) >= 5:
-        await update.message.reply_chat_action("typing")
+        wait_msg = await update.message.reply_text("⏳ جاري التفكير...")
         answer = await ask_gemini(msg, full=False)
+        await wait_msg.delete()
         if answer:
             context.user_data["last_ai_q"] = msg
             await update.message.reply_text(
@@ -966,6 +967,10 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode="Markdown",
             )
             return
+        await update.message.reply_text(
+            "⚠️ لم أستطع الإجابة الآن، حاول مرة أخرى بعد لحظات 🙏"
+        )
+        return
 
 
 async def _delete_msgs(context: ContextTypes.DEFAULT_TYPE, chat_id, msg_id1, msg_id2):
