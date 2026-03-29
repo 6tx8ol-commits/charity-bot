@@ -251,8 +251,12 @@ def athar_sa_cities_kb(ridx):
     rows.append([InlineKeyboardButton("🔙 رجوع للمناطق", callback_data="pr_sa_regions")])
     return InlineKeyboardMarkup(rows)
 
-async def athar_fetch_prayer(msg, country_code, city_en, city_ar):
+async def athar_fetch_prayer(msg, country_code, city_en, city_ar, context=None):
     await msg.reply_text("⏳ جاري جلب أوقات الصلاة...")
+    if context:
+        context.user_data["prayer_country"] = country_code
+        context.user_data["prayer_city"]    = city_en
+        context.user_data["prayer_city_ar"] = city_ar
     method = PRAYER_METHODS.get(country_code, PRAYER_METHODS["DEFAULT"])
     url = f"https://api.aladhan.com/v1/timingsByCity?city={city_en}&country={country_code}&method={method}"
     def _fetch():
@@ -282,10 +286,126 @@ async def athar_fetch_prayer(msg, country_code, city_en, city_ar):
         )
     else:
         text = f"⚠️ تعذّر جلب أوقات الصلاة لـ {city_ar}. حاول مرة أخرى."
+    chat_id = msg.chat_id
+    has_job = False
+    if context:
+        jobs = context.job_queue.get_jobs_by_name(f"athar_pray_daily_{chat_id}")
+        has_job = len(jobs) > 0
+    notify_btn = "🔕 إيقاف التنبيه" if has_job else "🔔 تفعيل التنبيه"
     back_kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔙 رجوع للدول", callback_data="pr_countries")]
+        [InlineKeyboardButton(notify_btn, callback_data="athar_pray_toggle")],
+        [InlineKeyboardButton("🔙 رجوع للدول", callback_data="pr_countries")],
     ])
     await msg.reply_text(text, parse_mode="Markdown", reply_markup=back_kb)
+
+# ═══════════════════════════════════════════════════════
+#  ATHAR PRAYER NOTIFICATIONS
+# ═══════════════════════════════════════════════════════
+
+def _athar_notify_job_name(chat_id):
+    return f"athar_pray_daily_{chat_id}"
+
+async def athar_send_prayer_alert(context):
+    d = context.job.data
+    await context.bot.send_message(
+        chat_id=d["chat_id"],
+        text=(
+            f"🔔 *حان وقت الصلاة*\n\n"
+            f"{d['prayer']}  —  `{d['time']}`\n"
+            f"📍 {d['city']}\n\n"
+            f"_حي على الصلاة، حي على الفلاح_\n\n"
+            "🤲 اللهم اجعلنا من المحافظين على الصلوات"
+        ),
+        parse_mode="Markdown",
+    )
+
+async def athar_prayer_daily_job(context):
+    d = context.job.data
+    chat_id = d["chat_id"]
+    country = d["country"]
+    city    = d["city"]
+    method  = PRAYER_METHODS.get(country, PRAYER_METHODS["DEFAULT"])
+    url = f"https://api.aladhan.com/v1/timingsByCity?city={city}&country={country}&method={method}"
+    def _fetch():
+        try:
+            return requests.get(url, timeout=10).json()
+        except Exception:
+            return None
+    data = await asyncio.get_event_loop().run_in_executor(None, _fetch)
+    if data and data.get("code") == 200:
+        t = data["data"]["timings"]
+        prayers = {
+            "🌙 الفجر":  t.get("Fajr"),
+            "☀️ الظهر":  t.get("Dhuhr"),
+            "🌤️ العصر":  t.get("Asr"),
+            "🌆 المغرب": t.get("Maghrib"),
+            "🌙 العشاء": t.get("Isha"),
+        }
+        from datetime import datetime
+        import pytz
+        _TZ = pytz.timezone("Asia/Riyadh")
+        now = datetime.now(_TZ)
+        for name, ptime in prayers.items():
+            if not ptime:
+                continue
+            h, m = map(int, ptime[:5].split(":"))
+            target = now.replace(hour=h, minute=m, second=0, microsecond=0)
+            if target > now:
+                delay = (target - now).total_seconds()
+                context.job_queue.run_once(
+                    athar_send_prayer_alert,
+                    when=delay,
+                    data={"chat_id": chat_id, "prayer": name,
+                          "time": ptime[:5], "city": city},
+                    name=f"athar_pray_{chat_id}_{name}",
+                )
+
+async def athar_enable_prayer_notify(update, context):
+    chat_id = update.effective_chat.id
+    country = context.user_data.get("prayer_country", "SA")
+    city    = context.user_data.get("prayer_city", "")
+    city_ar = context.user_data.get("prayer_city_ar", city)
+    if not city:
+        await update.message.reply_text("⚠️ اختر مدينتك أولاً من قائمة أوقات الصلاة.")
+        return
+    job_name = _athar_notify_job_name(chat_id)
+    for job in context.job_queue.get_jobs_by_name(job_name):
+        job.schedule_removal()
+    from datetime import time as dt_time
+    import pytz
+    _TZ = pytz.timezone("Asia/Riyadh")
+    context.job_queue.run_daily(
+        athar_prayer_daily_job,
+        time=dt_time(0, 0, 0, tzinfo=_TZ),
+        data={"chat_id": chat_id, "country": country, "city": city},
+        name=job_name,
+    )
+    await athar_prayer_daily_job(
+        type("FakeCtx", (), {
+            "job": type("J", (), {"data": {"chat_id": chat_id, "country": country, "city": city}})(),
+            "job_queue": context.job_queue,
+            "bot": context.bot,
+        })()
+    )
+    await update.message.reply_text(
+        f"✅ *تم تفعيل تنبيه الصلاة*\n\n"
+        f"📍 {city_ar}\n\n"
+        f"ستصلك رسالة عند كل أذان إن شاء الله 🕌",
+        parse_mode="Markdown",
+    )
+
+async def athar_disable_prayer_notify(update, context):
+    chat_id = update.effective_chat.id
+    job_name = _athar_notify_job_name(chat_id)
+    for job in context.job_queue.get_jobs_by_name(job_name):
+        job.schedule_removal()
+    for name in ["🌙 الفجر", "☀️ الظهر", "🌤️ العصر", "🌆 المغرب", "🌙 العشاء"]:
+        for job in context.job_queue.get_jobs_by_name(f"athar_pray_{chat_id}_{name}"):
+            job.schedule_removal()
+    await update.message.reply_text(
+        "🔕 *تم إيقاف تنبيه الصلاة*\n\nيمكنك إعادة تفعيله في أي وقت.",
+        parse_mode="Markdown",
+    )
 
 def prophets_keyboard_page1():
     return InlineKeyboardMarkup([
@@ -780,7 +900,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parts = data[6:].split("_")
         ridx, cidx = int(parts[0]), int(parts[1])
         city_ar = _PR_REGIONS[ridx][1][cidx]
-        await athar_fetch_prayer(query.message, "SA", city_ar, city_ar)
+        await athar_fetch_prayer(query.message, "SA", city_ar, city_ar, context)
     elif data.startswith("pr_c_"):
         code = data[5:]
         if code == "SA":
@@ -791,7 +911,52 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         elif code in CITY_MAP:
             city_en, city_ar = CITY_MAP[code]
-            await athar_fetch_prayer(query.message, code, city_en, city_ar)
+            await athar_fetch_prayer(query.message, code, city_en, city_ar, context)
+    elif data == "athar_pray_toggle":
+        chat_id = query.from_user.id
+        country = context.user_data.get("prayer_country", "SA")
+        city    = context.user_data.get("prayer_city", "")
+        city_ar = context.user_data.get("prayer_city_ar", city)
+        job_name = _athar_notify_job_name(chat_id)
+        jobs = context.job_queue.get_jobs_by_name(job_name)
+        if jobs:
+            for job in jobs:
+                job.schedule_removal()
+            for pn in ["🌙 الفجر", "☀️ الظهر", "🌤️ العصر", "🌆 المغرب", "🌙 العشاء"]:
+                for job in context.job_queue.get_jobs_by_name(f"athar_pray_{chat_id}_{pn}"):
+                    job.schedule_removal()
+            await query.message.reply_text(
+                "🔕 *تم إيقاف تنبيه الصلاة*\n\nيمكنك إعادة تفعيله في أي وقت.",
+                parse_mode="Markdown",
+            )
+        else:
+            if not city:
+                await query.message.reply_text("⚠️ اختر مدينتك أولاً من قائمة أوقات الصلاة.")
+            else:
+                for job in context.job_queue.get_jobs_by_name(job_name):
+                    job.schedule_removal()
+                from datetime import time as dt_time
+                import pytz
+                _TZ2 = pytz.timezone("Asia/Riyadh")
+                context.job_queue.run_daily(
+                    athar_prayer_daily_job,
+                    time=dt_time(0, 0, 0, tzinfo=_TZ2),
+                    data={"chat_id": chat_id, "country": country, "city": city},
+                    name=job_name,
+                )
+                await athar_prayer_daily_job(
+                    type("FakeCtx", (), {
+                        "job": type("J", (), {"data": {"chat_id": chat_id, "country": country, "city": city}})(),
+                        "job_queue": context.job_queue,
+                        "bot": context.bot,
+                    })()
+                )
+                await query.message.reply_text(
+                    f"✅ *تم تفعيل تنبيه الصلاة*\n\n"
+                    f"📍 {city_ar}\n\n"
+                    f"ستصلك رسالة عند كل أذان إن شاء الله 🕌",
+                    parse_mode="Markdown",
+                )
     elif data == "kursi":
         await query.message.reply_text(AYAT_KURSI)
         await query.message.reply_text(get_separator())
