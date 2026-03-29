@@ -21,7 +21,8 @@ from content import (
     fetch_prayer_times, PRAYER_NAMES_ORDER,
     SAUDI_REGIONS, SAUDI_CITIES, PROPHETS, QURAN_SURAHS, ALLAH_NAMES,
     WELCOME_TEXT, HELP_TEXT, MORNING_AZKAR_TEXT, EVENING_AZKAR_TEXT, SLEEP_AZKAR_TEXT,
-    SALAWAT_TEXT, ISTIJABA_TEXT, SOCIAL_TEXT, KAHF_TEXT, AYAT_KURSI, KHAWATIM_BAQARA, BAQIYAT
+    SALAWAT_TEXT, ISTIJABA_TEXT, SOCIAL_TEXT, KAHF_TEXT, AYAT_KURSI, KHAWATIM_BAQARA, BAQIYAT,
+    _SAHABA
 )
 
 
@@ -151,11 +152,23 @@ def back_keyboard():
 
 def azkar_daily_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🌅 اذكار الصباح", callback_data="sabah")],
-        [InlineKeyboardButton("🌙 اذكار المساء", callback_data="masa")],
+        [InlineKeyboardButton("🌅 اذكار الصباح", callback_data="sabah"),
+         InlineKeyboardButton("🌙 اذكار المساء", callback_data="masa")],
         [InlineKeyboardButton("😴 اذكار النوم", callback_data="nawm")],
         [InlineKeyboardButton("رجوع للقائمة", callback_data="menu")],
     ])
+
+ATHAR_SAHABA_NAMES = [e.split("\n\n")[0].replace(" رضي الله عنه", "") for e in _SAHABA]
+
+def athar_sahaba_keyboard():
+    rows = []
+    for i in range(0, len(ATHAR_SAHABA_NAMES), 2):
+        row = [InlineKeyboardButton(ATHAR_SAHABA_NAMES[i], callback_data=f"athar_sah_{i}")]
+        if i + 1 < len(ATHAR_SAHABA_NAMES):
+            row.append(InlineKeyboardButton(ATHAR_SAHABA_NAMES[i + 1], callback_data=f"athar_sah_{i+1}"))
+        rows.append(row)
+    rows.append([InlineKeyboardButton("🔙 رجوع للقائمة", callback_data="menu")])
+    return InlineKeyboardMarkup(rows)
 
 def prayer_times_keyboard():
     return InlineKeyboardMarkup([
@@ -512,10 +525,26 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     data = query.data
 
+    if data == "sahabi":
+        await query.message.reply_text(
+            "⭐ *قصص الصحابة الكرام رضي الله عنهم*\n\nاختر صحابياً:",
+            parse_mode="Markdown",
+            reply_markup=athar_sahaba_keyboard(),
+        )
+        return
+
+    if data.startswith("athar_sah_"):
+        idx = int(data.split("_")[2])
+        content = _SAHABA[idx]
+        back_kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 رجوع للصحابة", callback_data="sahabi")]
+        ])
+        await query.message.reply_text(content, reply_markup=back_kb)
+        return
+
     handlers = {
         "dua": get_random_dua,
         "dua_nabi": get_random_dua_nabi,
-        "sahabi": get_random_sahabi,
         "quran_story": get_random_quran_story,
         "ayah": get_random_ayah,
         "hadith": get_random_hadith,
