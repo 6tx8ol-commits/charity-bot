@@ -730,21 +730,54 @@ async def route_seerah(update, context, txt):
 #  SAHABA
 # ═══════════════════════════════════════════════════════
 
+SAHABA_KEYS = list(SAHABA.keys())
+
+def sahaba_inline_keyboard():
+    rows = []
+    for i in range(0, len(SAHABA_KEYS), 2):
+        row = [InlineKeyboardButton(SAHABA_KEYS[i], callback_data=f"gsahaba_{i}")]
+        if i + 1 < len(SAHABA_KEYS):
+            row.append(InlineKeyboardButton(SAHABA_KEYS[i + 1], callback_data=f"gsahaba_{i+1}"))
+        rows.append(row)
+    rows.append([InlineKeyboardButton("🔙 القائمة الرئيسية", callback_data="gsahaba_main")])
+    return InlineKeyboardMarkup(rows)
+
 async def show_sahaba_list(update, context):
-    set_state(context, "sahaba")
-    rows = [[name] for name in SAHABA] + [[BACK_MAIN]]
-    await reply(
-        update,
+    set_state(context, "main")
+    await update.effective_message.reply_text(
         "📚 *قصص الصحابة الكرام رضي الله عنهم*\n\nاختر صحابياً:",
-        kb(rows),
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=sahaba_inline_keyboard(),
+    )
+
+async def handle_ghazi_sahaba_callback(update, context):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    if data == "gsahaba_main":
+        await show_main(update, context)
+        return
+    if data == "gsahaba_back":
+        await query.message.reply_text(
+            "📚 *قصص الصحابة الكرام رضي الله عنهم*\n\nاختر صحابياً:",
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=sahaba_inline_keyboard(),
+        )
+        return
+    idx = int(data.split("_")[1])
+    key = SAHABA_KEYS[idx]
+    content = SAHABA[key]
+    back_kb = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔙 رجوع للصحابة", callback_data="gsahaba_back")]
+    ])
+    await query.message.reply_text(
+        content,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=back_kb,
     )
 
 async def route_sahaba(update, context, txt):
-    content = SAHABA.get(txt)
-    if content:
-        await reply(update, content, kb([["🔙 رجوع للصحابة"]]))
-    elif txt == "🔙 رجوع للصحابة":
-        await show_sahaba_list(update, context)
+    pass
 
 # ═══════════════════════════════════════════════════════
 #  BAQIYAT
@@ -1267,6 +1300,7 @@ def main():
     app.add_handler(CommandHandler("ping",   cmd_ping))
 
     app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(ghazi_back_surahs|noop)$"))
+    app.add_handler(CallbackQueryHandler(handle_ghazi_sahaba_callback, pattern=r"^gsahaba_"))
     app.add_handler(CallbackQueryHandler(handle_ghazi_menu_callback, pattern=r"^gmenu_"))
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_msg
