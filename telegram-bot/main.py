@@ -215,10 +215,13 @@ WELCOME = (
 
 async def show_main(update, context, text=None):
     set_state(context, "main")
-    full = (text or WELCOME) + get_footer()
-    await update.effective_message.reply_text(full, parse_mode=ParseMode.MARKDOWN, reply_markup=MAIN_KB)
-    await update.effective_message.reply_text(DUA_GHAZI)
-    await update.effective_message.reply_text("📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍", parse_mode=ParseMode.MARKDOWN, reply_markup=main_inline_menu_ghazi())
+    combined = (
+        (text or WELCOME)
+        + "\n\n━━━━━━━━━━━━━━\n"
+        "📋 *اختر ما تريد:*\nأو اكتب سؤالك الديني مباشرة وسأجيبك 🤍"
+        + get_footer()
+    )
+    await update.effective_message.reply_text(combined, parse_mode=ParseMode.MARKDOWN, reply_markup=main_inline_menu_ghazi())
 
 # ─── START ─────────────────────────────────────────────
 
@@ -1403,7 +1406,7 @@ def main():
     ))
 
     logger.info("🤖 البوت يعمل...")
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
