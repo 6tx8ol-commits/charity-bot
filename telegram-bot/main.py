@@ -77,31 +77,12 @@ logger = logging.getLogger(__name__)
 TOKEN = os.getenv("AZKAR_BOT_TOKEN")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-OPENROUTER_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
+OPENROUTER_MODEL = "google/gemma-3-4b-it:free"
 
-AI_SYSTEM_PROMPT = """أنت مساعد إسلامي عالم ومتخصص في جميع علوم الإسلام، تجيب على أسئلة المسلمين بعلم ورويّة.
-
-مجالاتك:
-- العقيدة الإسلامية: التوحيد، أسماء الله وصفاته، الملائكة، الكتب، الرسل، اليوم الآخر، القدر
-- القرآن الكريم: معاني الآيات، التفسير، أسباب النزول، فضائل السور
-- الحديث النبوي الشريف: شرح الأحاديث، درجاتها، رواتها
-- الفقه والأحكام: الطهارة، الصلاة، الزكاة، الصوم، الحج، المعاملات، الحلال والحرام
-- السيرة النبوية وسير الأنبياء والصحابة والتابعين
-- أخبار الجنة والنار وأهوال يوم القيامة وعلاماته
-- التوبة والاستغفار وأحكام العاصين والفاسقين والكفار
-- الشيطان والجن وعوامل الوسوسة والتحصين
-- الأذكار والأدعية والرقية الشرعية
-- الأخلاق والآداب الإسلامية
-- الفرق والمذاهب الإسلامية (بموضوعية وعلم)
-- تاريخ الإسلام والحضارة الإسلامية
-
-قواعدك:
-- أجب بالعربية الواضحة المفهومة
-- استند دائماً إلى القرآن والسنة الصحيحة
-- اذكر المصدر: (سورة ... آية ...) أو (رواه ... وهو صحيح/حسن)
-- كن دقيقاً وموجزاً، لا تطوّل بلا فائدة
-- في الفتاوى الشخصية الدقيقة: انصح بمراجعة عالم متخصص
-- لا تتكلم في أمور دنيوية بحتة لا علاقة لها بالدين"""
+AI_SYSTEM_PROMPT = """أنت مساعد إسلامي. أجب بالعربية بشكل موجز ودقيق.
+- استند للقرآن والسنة واذكر المصدر باختصار
+- للفتاوى الشخصية: انصح بمراجعة عالم
+- لا تتكلم في أمور غير دينية"""
 
 
 async def ask_gemini(question: str) -> str | None:
@@ -113,7 +94,7 @@ async def ask_gemini(question: str) -> str | None:
             {"role": "system", "content": AI_SYSTEM_PROMPT},
             {"role": "user", "content": question},
         ],
-        "max_tokens": 350,
+        "max_tokens": 200,
         "temperature": 0.3,
     }
     try:
@@ -122,7 +103,7 @@ async def ask_gemini(question: str) -> str | None:
                 OPENROUTER_URL,
                 json=payload,
                 headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-                timeout=aiohttp.ClientTimeout(total=20),
+                timeout=aiohttp.ClientTimeout(total=12),
             ) as resp:
                 data = await resp.json()
                 return data["choices"][0]["message"]["content"]
