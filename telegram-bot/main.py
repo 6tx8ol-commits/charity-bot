@@ -23,7 +23,7 @@ from quran_data import SURAHS, AZKAR, HADITH_OF_DAY
 from prayer_data import COUNTRIES, SA_REGIONS, PRAYER_METHODS
 from islamic_content import (
     DUAS, SAHABA, QURAN_STORIES, FADHAIL,
-    ADAB, TAHSIN, BAQIYAT, ISTIGHFAR, AYAT_KARIMA,
+    ADAB, TAHSIN, BAQIYAT, ISTIGHFAR, AYAT_KARIMA, ASHARA_MUBASHARA,
 )
 
 logging.basicConfig(
@@ -144,6 +144,7 @@ def main_inline_menu_ghazi():
          InlineKeyboardButton("🕌 ادعية الانبياء", callback_data="gmenu_prophets")],
         [InlineKeyboardButton("📚 قصة صحابي", callback_data="gmenu_sahaba"),
          InlineKeyboardButton("🌙 السيرة النبوية", callback_data="gmenu_seerah")],
+        [InlineKeyboardButton("🌟 العشرة المبشرون بالجنة", callback_data="gmenu_ashara")],
         [InlineKeyboardButton("💎 الباقيات الصالحات", callback_data="gmenu_baqiyat"),
          InlineKeyboardButton("📜 قصة قرآنية", callback_data="gmenu_qstories")],
         [InlineKeyboardButton("🛡️ آية الكرسي", callback_data="gmenu_kursi"),
@@ -412,6 +413,7 @@ async def handle_ghazi_menu_callback(update, context):
         "gmenu_prophets":   show_prophets_list,
         "gmenu_seerah":     show_seerah_menu,
         "gmenu_sahaba":     show_sahaba_list,
+        "gmenu_ashara":     show_ashara_list,
         "gmenu_baqiyat":    show_baqiyat,
         "gmenu_qstories":   show_quran_stories_list,
         "gmenu_kursi":      show_ayat_karima,
@@ -778,6 +780,58 @@ async def handle_ghazi_sahaba_callback(update, context):
 
 async def route_sahaba(update, context, txt):
     pass
+
+# ═══════════════════════════════════════════════════════
+#  ASHARA MUBASHARA
+# ═══════════════════════════════════════════════════════
+
+ASHARA_KEYS = list(ASHARA_MUBASHARA.keys())
+
+def ashara_inline_keyboard():
+    rows = []
+    for i in range(0, len(ASHARA_KEYS), 2):
+        row = [InlineKeyboardButton(ASHARA_KEYS[i], callback_data=f"gashara_{i}")]
+        if i + 1 < len(ASHARA_KEYS):
+            row.append(InlineKeyboardButton(ASHARA_KEYS[i + 1], callback_data=f"gashara_{i+1}"))
+        rows.append(row)
+    rows.append([InlineKeyboardButton("🔙 القائمة الرئيسية", callback_data="gashara_main")])
+    return InlineKeyboardMarkup(rows)
+
+async def show_ashara_list(update, context):
+    set_state(context, "main")
+    await update.effective_message.reply_text(
+        "🌟 *العشرة المبشرون بالجنة رضي الله عنهم*\n\n"
+        "قال النبي ﷺ: ❝ أبو بكر في الجنة، وعمر في الجنة، وعثمان في الجنة، وعلي في الجنة، وطلحة في الجنة، والزبير في الجنة، وعبد الرحمن بن عوف في الجنة، وسعد في الجنة، وسعيد في الجنة، وأبو عبيدة بن الجراح في الجنة ❞\n\n"
+        "اختر أحد الصحابة الكرام:",
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=ashara_inline_keyboard(),
+    )
+
+async def handle_ghazi_ashara_callback(update, context):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    if data == "gashara_main":
+        await show_main(update, context)
+        return
+    if data == "gashara_back":
+        await query.message.reply_text(
+            "🌟 *العشرة المبشرون بالجنة رضي الله عنهم*\n\nاختر أحد الصحابة الكرام:",
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=ashara_inline_keyboard(),
+        )
+        return
+    idx = int(data.split("_")[1])
+    key = ASHARA_KEYS[idx]
+    content = ASHARA_MUBASHARA[key]
+    back_kb = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🔙 رجوع للعشرة", callback_data="gashara_back")]
+    ])
+    await query.message.reply_text(
+        content,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=back_kb,
+    )
 
 # ═══════════════════════════════════════════════════════
 #  BAQIYAT
@@ -1301,6 +1355,7 @@ def main():
 
     app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(ghazi_back_surahs|noop)$"))
     app.add_handler(CallbackQueryHandler(handle_ghazi_sahaba_callback, pattern=r"^gsahaba_"))
+    app.add_handler(CallbackQueryHandler(handle_ghazi_ashara_callback, pattern=r"^gashara_"))
     app.add_handler(CallbackQueryHandler(handle_ghazi_menu_callback, pattern=r"^gmenu_"))
     app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_msg
