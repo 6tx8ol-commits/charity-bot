@@ -239,6 +239,10 @@ async def cmd_start(update, context):
     save_user(update.effective_user)
     await show_main(update, context)
 
+async def cmd_ping(update, context):
+    key = "✅ موجود" if OPENROUTER_API_KEY else "❌ غير موجود"
+    await update.message.reply_text(f"🏓 البوت يعمل!\nOPENROUTER_API_KEY: {key}")
+
 async def cmd_testai(update, context):
     key_set = bool(OPENROUTER_API_KEY)
     key_preview = f"{OPENROUTER_API_KEY[:8]}..." if key_set else "---"
@@ -1375,6 +1379,7 @@ def main():
     app.add_handler(CommandHandler("start",  cmd_start))
     app.add_handler(CommandHandler("menu",   cmd_start))
     app.add_handler(CommandHandler("users",  cmd_users))
+    app.add_handler(CommandHandler("ping",   cmd_ping))
     app.add_handler(CommandHandler("testai", cmd_testai))
     app.add_handler(CallbackQueryHandler(handle_ghazi_quran_callback, pattern=r"^(ghazi_back_surahs|noop)$"))
     app.add_handler(CallbackQueryHandler(handle_ghazi_menu_callback, pattern=r"^gmenu_"))
