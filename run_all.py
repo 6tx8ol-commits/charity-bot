@@ -4,7 +4,7 @@ if os.environ.get('REPL_ID') or os.environ.get('REPLIT_CLUSTER') or os.environ.g
     print("⚠️ Replit بيئة — البوتان يعملان على Render.")
     sys.exit(0)
 
-print("🚀 تشغيل البوتين على Render...")
+print("🚀 تشغيل البوتات الثلاثة على Render...")
 
 _procs = []
 _lock  = threading.Lock()
@@ -54,11 +54,14 @@ def run_bot(path, name, startup_delay=0):
         print(f"⛔ {name} توقف (exit {code}) — إعادة تشغيل خلال 35 ثانية...")
         time.sleep(35)
 
-t1 = threading.Thread(target=run_bot, args=("athar-bot",   "بوت أثر",     0),  daemon=True)
+t1 = threading.Thread(target=run_bot, args=("athar-bot",    "بوت أثر",     0),  daemon=True)
 t2 = threading.Thread(target=run_bot, args=("telegram-bot", "بوت الأذكار", 5),  daemon=True)
+t3 = threading.Thread(target=run_bot, args=("khayyal-bot",  "بوت خَيال",  10),  daemon=True)
 
 t1.start()
 t2.start()
+t3.start()
 
 t1.join()
 t2.join()
+t3.join()
