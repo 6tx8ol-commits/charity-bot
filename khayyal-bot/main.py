@@ -36,19 +36,11 @@ SEP = "─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─"
 
 def poets_keyboard():
     rows = []
-    keys = list(POETS.keys())
-    for i in range(0, len(keys), 2):
-        row = [InlineKeyboardButton(
-            f"{POETS[keys[i]]['label']}  {POETS[keys[i]]['name']}",
-            callback_data=f"poet_{keys[i]}",
-        )]
-        if i + 1 < len(keys):
-            k2 = keys[i + 1]
-            row.append(InlineKeyboardButton(
-                f"{POETS[k2]['label']}  {POETS[k2]['name']}",
-                callback_data=f"poet_{k2}",
-            ))
-        rows.append(row)
+    for key, poet in POETS.items():
+        rows.append([InlineKeyboardButton(
+            f"{poet['label']}  {poet['name']}",
+            callback_data=f"poet_{key}",
+        )])
     return InlineKeyboardMarkup(rows)
 
 def poems_keyboard(poet_key):
